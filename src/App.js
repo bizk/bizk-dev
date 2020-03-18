@@ -40,76 +40,59 @@ class App extends React.Component {
         <Container style={{backgroundColor: '#fcfcfc', padding:'2rem'}}>
           <h1 fluid style={{textAlign:'center'}} >What I have done so far</h1>
           <Carousel style={{paddingTop:'1rem'}}>
-            <Carousel.Item>
+            <Carousel.Item style={{marginBottom: '1rem'}}>
               <Row>
                 <Col>
-                  <Card style={{width:'20rem'}}> 
-                    <Card.Img src='https://picsum.photos/id/11/40'/>
-                    <Card.Body>
-                      <Card.Title> Neque porro quisquam est qui,</Card.Title>
-                      <Card.Text>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa </Card.Text>
-                    </Card.Body>
-                  </Card>
+                  <ProjectCard image="https://picsum.photos/id/11/30" title="PROJECT 1" description="Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."/>
                 </Col>
                 <Col>
-                  <Card style={{width:'20rem'}}> 
-                    <Card.Img src='https://picsum.photos/id/12/40'/>
-                    <Card.Body>
-                      <Card.Title> Neque porro quisquam est qui,</Card.Title>
-                      <Card.Text>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa </Card.Text>
-                    </Card.Body>
-                  </Card>
+                  <ProjectCard image="https://picsum.photos/id/12/40" title="PROJECT 2" description="Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."/>
                 </Col>
                 <Col>
-                  <Card style={{width:'20rem'}}> 
-                    <Card.Img src='https://picsum.photos/id/13/40'/>
-                    <Card.Body>
-                      <Card.Title> Neque porro quisquam est qui,</Card.Title>
-                      <Card.Text>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa </Card.Text>
-                    </Card.Body>
-                  </Card>
+                  <ProjectCard image="https://picsum.photos/id/13/40" title="PROJECT 3" description="Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."/>
                 </Col>
               </Row>
             </Carousel.Item>
-            <Carousel.Item>
+            <Carousel.Item style={{marginBottom: '1rem'}}>
               <Row>
                 <Col>
-                  <Card style={{width:'20rem'}}> 
-                    <Card.Img src='https://picsum.photos/id/14/40'/>
-                    <Card.Body>
-                      <Card.Title> Neque porro quisquam est qui,</Card.Title>
-                      <Card.Text>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa </Card.Text>
-                    </Card.Body>
-                  </Card>
+                  <ProjectCard image="https://picsum.photos/id/14/40" title="PROJECT 4" description="Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."/>
                 </Col>
                 <Col>
-                  <Card style={{width:'20rem'}}> 
-                    <Card.Img src='https://picsum.photos/id/15/40'/>
-                    <Card.Body>
-                      <Card.Title> Neque porro quisquam est qui,</Card.Title>
-                      <Card.Text>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa </Card.Text>
-                    </Card.Body>
-                  </Card>
+                  <ProjectCard image="https://picsum.photos/id/15/40" title="PROJECT 5" description="Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."/>
                 </Col>
                 <Col>
-                  <Card style={{width:'20rem'}}> 
-                    <Card.Img src='https://picsum.photos/id/16/40'/>
-                    <Card.Body>
-                      <Card.Title> Neque porro quisquam est qui,</Card.Title>
-                      <Card.Text>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa </Card.Text>
-                    </Card.Body>
-                  </Card>
+                  <ProjectCard image="https://picsum.photos/id/16/40" title="PROJECT 6" description="Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."/>
                 </Col>
               </Row>
             </Carousel.Item>
           </Carousel>
         </Container>
 
+        <Container fluid style={{paddingTop: '2rem', backgroundColor: '#353535', color:'#fff'}}>
+          <h1 fluid style={{textAlign:'center'}}>Woah! thanks for your time!</h1>
+          <h4 fluid style={{textAlign:'center'}}>If you landed over here I appreciate a whole lot your time,</h4>
+          <h4 fluid style={{textAlign:'center'}}>It would be awesome to stay in touch! Feel free to contact me at any time trough my social media.</h4>
+        </Container>
       </div>
     );
   }
 }
 
+class ProjectCard extends React.Component {
+
+  render() {
+    return(
+      <Card style={{width:'20rem', boxShadow: '5px 5px 15px grey'}}> 
+        <Card.Img fluid src={this.props.image}/>
+        <Card.Body>
+          <Card.Title>{this.props.title}</Card.Title>
+          <Card.Text>{this.props.description}</Card.Text>
+        </Card.Body>
+      </Card>
+    );
+  } 
+}
 
 
 export default App;

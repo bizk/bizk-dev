@@ -40,3 +40,14 @@
 .read-the-docs {
   color: #888;
 }
+
+.custom-menubar {
+  background: transparent !important;
+  border: none !important;
+  justify-content: center;
+}
+
+.custom-menubar .p-menubar-root-list {
+  justify-content: center;
+  width: 100%;
+}

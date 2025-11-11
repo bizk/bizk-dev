@@ -9,8 +9,8 @@ export const WorkPanel = () => {
        <img 
          src="https://primefaces.org/cdn/primereact/images/galleria/galleria7.jpg" 
          alt="Image" 
-         width="250" 
-         height="250" 
+         width="160" 
+         height="160" 
          style={{ 
            borderRadius: '50%', 
            objectFit: 'cover',
@@ -19,7 +19,7 @@ export const WorkPanel = () => {
          }} 
        />
 
-        <h1>Carlos Santiago Yanzon</h1>
+        <h2>Carlos Santiago Yanzon</h2>
         <p>Informatics Engineer | Distributed Systems and blockchain Developer | Creative</p>
 
         <p>Carlos is a self driven professional and an Engineer with many years of experience in the industry working on complex porjects, at large scale companies and startups. He also has experience in entrepreneurship giving him the ability to communicate with different stakeholders. Carlos gets the job done and adapts to different circunstances with the tools and resources available (Some may say this is an Argentinian trait). He believes in Honest and direct communication, prefers dynamic work environments and is motivated by challenge.</p>

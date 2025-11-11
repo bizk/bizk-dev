@@ -1,12 +1,10 @@
 import { useState } from 'react'
 import './App.css'
-import { Divider } from 'primereact/divider'
-import { Card } from 'primereact/card'
 import { WorkPanel } from './components/Work/Panel'
 import { Menubar } from 'primereact/menubar'
 import type { MenuItem } from 'primereact/menuitem'
 
-type ViewType = 'about' | 'entrepreneurship' | 'projects'
+type ViewType = 'about' | 'entrepreneurship' | 'projects' | 'blog'
 
 function App() {
   const [activeView, setActiveView] = useState<ViewType>('about')
@@ -29,6 +27,11 @@ function App() {
       label: 'Projects', 
       icon: 'pi pi-folder',
       command: () => setActiveView('projects')
+    },
+    { 
+      label: 'Blog', 
+      icon: 'pi pi-book',
+      command: () => setActiveView('blog')
     }
   ]
 
@@ -40,6 +43,8 @@ function App() {
         return <p>Entrepreneurship</p>
       case 'projects':
         return <p>Skills</p>
+      case 'blog':
+        return <p>Blog</p>
       default:
         return <WorkPanel />
     }
@@ -47,7 +52,7 @@ function App() {
 
   return (
     <main>
-      <Menubar model={menuItems} />
+      <Menubar model={menuItems} className="custom-menubar" />
       {renderView()}
     </main >
   )

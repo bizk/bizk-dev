@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler pages deploy dist",
-    "deploy:preview": "npm run build && wrangler pages deploy dist --env preview"
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=bizk-dev",
+    "deploy:preview": "npm run build && wrangler pages deploy dist --env preview --project-name=bizk-dev"
   },
   "dependencies": {
     "primereact": "^10.9.7",

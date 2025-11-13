@@ -212,9 +212,6 @@ export const WorkPanel = () => {
         <h2 className="section-title">Skills</h2>
       </Divider>
 
-      <Divider align="center">
-        <h2 className="section-title">Entrepreneurship</h2>
-      </Divider>
     </div>
   )
 }

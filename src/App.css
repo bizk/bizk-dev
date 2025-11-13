@@ -2,7 +2,7 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  text-align: left;
 }
 
 .logo {
@@ -50,4 +50,306 @@
 .custom-menubar .p-menubar-root-list {
   justify-content: center;
   width: 100%;
+}
+
+/* Work Panel Container */
+.work-panel-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Profile Header */
+.profile-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.profile-image {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 1.5rem;
+  border: 4px solid var(--p-primary-color, #60a5fa);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(96, 165, 250, 0.3);
+}
+
+.profile-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: var(--p-text-color, #ffffff);
+  line-height: 1.2;
+}
+
+.profile-title {
+  font-size: 1.25rem;
+  color: var(--p-text-secondary-color, #a0a0a0);
+  margin: 0 0 1.5rem 0;
+  font-weight: 400;
+}
+
+.profile-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--p-text-color, #e0e0e0);
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--p-primary-color, #60a5fa);
+  margin: 2rem 0;
+  text-align: center;
+}
+
+/* Work Experience Cards */
+.work-experience-card {
+  margin-bottom: 2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid var(--p-surface-border, rgba(255, 255, 255, 0.1));
+  background: var(--p-surface-card, rgba(255, 255, 255, 0.03));
+}
+
+.work-experience-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.work-experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.work-experience-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--p-text-color, #ffffff);
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
+  line-height: 1.4;
+}
+
+.work-experience-date {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.work-experience-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--p-text-secondary-color, #c0c0c0);
+  margin: 0 0 1.5rem 0;
+}
+
+.work-experience-technologies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.technology-chip {
+  font-size: 0.875rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--p-primary-color, #60a5fa);
+  color: white;
+  border-radius: 6px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.technology-chip:hover {
+  transform: scale(1.05);
+  background: var(--p-primary-color, #4a9eff);
+}
+
+.work-experience-points {
+  margin-top: 1rem;
+}
+
+.work-experience-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.work-experience-point {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+  color: var(--p-text-color, #e0e0e0);
+  font-size: 0.95rem;
+}
+
+.work-experience-point::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--p-primary-color, #60a5fa);
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.work-experience-point:last-child {
+  margin-bottom: 0;
+}
+
+/* Info Cards (Education, Awards, Patents) */
+.info-card {
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid var(--p-surface-border, rgba(255, 255, 255, 0.1));
+  background: var(--p-surface-card, rgba(255, 255, 255, 0.03));
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--p-text-color, #ffffff);
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
+  line-height: 1.4;
+}
+
+.card-date {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.card-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--p-text-secondary-color, #c0c0c0);
+  margin: 0 0 1rem 0;
+}
+
+.card-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0 0;
+}
+
+.card-list-item {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+  color: var(--p-text-color, #e0e0e0);
+  font-size: 0.95rem;
+}
+
+.card-list-item::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--p-primary-color, #60a5fa);
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.card-list-item:last-child {
+  margin-bottom: 0;
+}
+
+.card-list-item strong {
+  color: var(--p-text-color, #ffffff);
+  font-weight: 600;
+}
+
+/* Divider Styling */
+.p-divider.p-divider-horizontal {
+  margin: 2.5rem 0;
+}
+
+.p-divider .p-divider-content {
+  padding: 0 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .work-panel-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .profile-name {
+    font-size: 2rem;
+  }
+
+  .profile-title {
+    font-size: 1.1rem;
+  }
+
+  .profile-description {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .work-experience-title,
+  .card-title {
+    font-size: 1.25rem;
+  }
+
+  .work-experience-header,
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .work-experience-date,
+  .card-date {
+    align-self: flex-start;
+  }
+}
+
+/* PrimeReact Card Overrides */
+.p-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.p-card-body {
+  padding: 1.75rem;
+}
+
+.p-card-content {
+  padding: 0;
 }

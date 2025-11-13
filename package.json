@@ -12,6 +12,7 @@
     "deploy:preview": "npm run build && wrangler pages deploy dist --env preview --project-name=bizk-dev"
   },
   "dependencies": {
+    "@cloudflare/vite-plugin": "^1.14.2",
     "primereact": "^10.9.7",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

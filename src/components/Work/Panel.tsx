@@ -9,7 +9,7 @@ export const WorkPanel = () => {
     <div className="work-panel-container">
       <div className="profile-header">
         <img 
-          src="https://primefaces.org/cdn/primereact/images/galleria/galleria7.jpg" 
+          src="/public/profile.jpg" 
           alt="Carlos Santiago Yanzon" 
           className="profile-image"
         />

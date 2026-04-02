@@ -321,6 +321,7 @@ function App() {
   const sideBlog = filteredBlogPosts[1] ?? null
   const compactBlogs = filteredBlogPosts.slice(2, 5)
   const wideBlog = filteredBlogPosts[5] ?? filteredBlogPosts[compactBlogs.length + 2] ?? null
+  const hasMultipleBlogPages = filteredBlogPosts.length > 6
 
   const navigate = (view: View) => {
     setActiveView(view)
@@ -750,7 +751,9 @@ function App() {
                     <div
                       className="blog-feature-visual"
                       style={featuredBlog.imageUrl ? { backgroundImage: `url(${featuredBlog.imageUrl})` } : undefined}
-                    />
+                    >
+                      <div className="blog-visual-overlay" />
+                    </div>
                     <div className="blog-feature-copy">
                       <div className="blog-card-meta">
                         <span className="card-tag">Featured System</span>
@@ -759,8 +762,13 @@ function App() {
                       <h2>{featuredBlog.title}</h2>
                       <p>{featuredBlog.summary}</p>
                       <div className="blog-feature-footer">
-                        <span className="blog-card-context">{featuredBlog.category}</span>
-                        <span className="text-action">Read Blog</span>
+                        <div className="blog-context-cluster">
+                          <span className="blog-context-icon" aria-hidden="true">
+                            ≈
+                          </span>
+                          <span className="blog-card-context">{featuredBlog.category}</span>
+                        </div>
+                        <span className="text-action">Read Blog →</span>
                       </div>
                     </div>
                   </button>
@@ -775,12 +783,15 @@ function App() {
                         <h3>{sideBlog.title}</h3>
                         <p>{sideBlog.summary}</p>
                       </div>
-                      <div className="pill-row">
-                        {sideBlog.tags.map((tag) => (
-                          <span key={`${sideBlog.id}-${tag}`} className="pill">
-                            {tag}
-                          </span>
-                        ))}
+                      <div className="blog-side-footer">
+                        <div className="blog-side-tags">
+                          {sideBlog.tags.map((tag) => (
+                            <span key={`${sideBlog.id}-${tag}`} className="blog-side-pill">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <span className="text-action">Read Blog →</span>
                       </div>
                     </button>
                   )}
@@ -809,7 +820,9 @@ function App() {
                       <div
                         className="blog-wide-visual"
                         style={wideBlog.imageUrl ? { backgroundImage: `url(${wideBlog.imageUrl})` } : undefined}
-                      />
+                      >
+                        <div className="blog-visual-overlay" />
+                      </div>
                       <div className="blog-wide-copy">
                         <div className="blog-card-meta">
                           <span className="card-tag">Deep Dive</span>
@@ -819,30 +832,42 @@ function App() {
                         <p>{wideBlog.summary}</p>
                         <div className="blog-wide-footer">
                           <span className="blog-card-context">Technical paper • {wideBlog.readTime}</span>
-                          <span className="text-action">Read Blog</span>
+                          <span className="text-action">Read Blog →</span>
                         </div>
                       </div>
                     </button>
                   )}
+
+                  {!sideBlog && filteredBlogPosts.length === 1 && (
+                    <div className="blog-single-note">
+                      <p className="meta-label">Latest entry</p>
+                      <p>
+                        Add more blog folders under `blogs/` and this overview will expand into the full
+                        editorial grid from the reference.
+                      </p>
+                    </div>
+                  )}
                 </section>
 
-                <section className="blog-pagination">
-                  <button type="button" className="blog-page-button">
-                    ‹
-                  </button>
-                  <button type="button" className="blog-page-button is-active">
-                    1
-                  </button>
-                  <button type="button" className="blog-page-button">
-                    2
-                  </button>
-                  <button type="button" className="blog-page-button">
-                    3
-                  </button>
-                  <button type="button" className="blog-page-button">
-                    ›
-                  </button>
-                </section>
+                {hasMultipleBlogPages && (
+                  <section className="blog-pagination">
+                    <button type="button" className="blog-page-button">
+                      ‹
+                    </button>
+                    <button type="button" className="blog-page-button is-active">
+                      1
+                    </button>
+                    <button type="button" className="blog-page-button">
+                      2
+                    </button>
+                    <button type="button" className="blog-page-button">
+                      3
+                    </button>
+                    <button type="button" className="blog-page-button">
+                      ›
+                    </button>
+                  </section>
+                )}
               </>
             ) : (
               <section className="empty-blog-state">

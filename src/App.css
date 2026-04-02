@@ -1154,16 +1154,23 @@
 
 .markdown-content pre {
   margin: 0 0 1.5rem;
-  padding: 1.4rem;
   overflow-x: auto;
   background: #070d1f;
   border-left: 2px solid var(--color-tertiary);
+  border-radius: 12px;
 }
 
 .markdown-content pre code {
   padding: 0;
   background: transparent;
   color: var(--color-text);
+}
+
+.markdown-content pre code.hljs {
+  display: block;
+  padding: 1.4rem;
+  background: transparent;
+  color: inherit;
 }
 
 .markdown-content a {

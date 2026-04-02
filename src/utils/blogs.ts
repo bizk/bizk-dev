@@ -21,6 +21,8 @@ export type BlogPost = {
   showImage: boolean
 }
 
+export type BlogSummary = Omit<BlogPost, 'content'>
+
 const manifestModules = import.meta.glob('../../blogs/**/blog.json', {
   eager: true,
   import: 'default',
@@ -64,28 +66,49 @@ const toCategory = (labels: string[]): string => {
   return meaningfulLabel ?? 'General'
 }
 
+const toBasePost = (path: string, manifest: BlogManifest) => {
+  const id = getFolderId(path)
+  const imagePath = path.replace('blog.json', 'blog.png')
+  const tags = manifest.labels ?? []
+
+  return {
+    id,
+    title: manifest.title,
+    summary: manifest.description,
+    category: toCategory(tags),
+    rawDate: manifest.date,
+    date: formatDate(manifest.date),
+    tags,
+    imageUrl: imageModules[imagePath],
+    showImage: Boolean(manifest.displayImage && imageModules[imagePath]),
+  }
+}
+
+const sortPosts = <T extends { rawDate: string }>(posts: T[]): T[] =>
+  posts.sort((a, b) => new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime())
+
 export const loadBlogPosts = (): BlogPost[] => {
   const posts = Object.entries(manifestModules).map(([path, manifest]) => {
-    const id = getFolderId(path)
     const markdownPath = path.replace('blog.json', 'blog.md')
-    const imagePath = path.replace('blog.json', 'blog.png')
     const markdown = markdownModules[markdownPath] ?? ''
-    const tags = manifest.labels ?? []
 
     return {
-      id,
-      title: manifest.title,
-      summary: manifest.description,
-      category: toCategory(tags),
-      rawDate: manifest.date,
-      date: formatDate(manifest.date),
+      ...toBasePost(path, manifest),
       readTime: manifest.timeToRead ? `${manifest.timeToRead} min read` : estimateReadTime(markdown),
-      tags,
       content: markdown,
-      imageUrl: imageModules[imagePath],
-      showImage: Boolean(manifest.displayImage && imageModules[imagePath]),
     }
   })
 
-  return posts.sort((a, b) => new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime())
+  return sortPosts(posts)
 }
+
+export const loadBlogSummaries = (): BlogSummary[] =>
+  sortPosts(
+    Object.entries(manifestModules).map(([path, manifest]) => ({
+      ...toBasePost(path, manifest),
+      readTime: manifest.timeToRead ? `${manifest.timeToRead} min read` : '1 min read',
+    })),
+  )
+
+export const loadBlogPostById = (id: string): BlogPost | null =>
+  loadBlogPosts().find((post) => post.id === id) ?? null

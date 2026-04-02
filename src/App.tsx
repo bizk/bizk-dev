@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { marked } from 'marked'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/a11y-dark.css'
+import { Marked, type Tokens } from 'marked'
 import './App.css'
-import { loadBlogPosts } from './utils/blogs'
+import { loadBlogPostById, loadBlogSummaries } from './utils/blogs'
 
-type View = 'home' | 'cv' | 'projects' | 'blog'
+type View = 'home' | 'cv' | 'projects' | 'blog' | 'blogArticle'
 
 type Experience = {
   role: string
@@ -158,7 +160,7 @@ const projects: Project[] = [
   },
 ]
 
-const blogPosts = loadBlogPosts()
+const blogSummaries = loadBlogSummaries()
 
 const education = [
   {
@@ -231,6 +233,23 @@ const contactLinks: { id: 'linkedin' | 'github' | 'email'; label: string; href: 
   },
 ]
 
+const articleMarkdown = new Marked({
+  async: false,
+  renderer: {
+    code({ text, lang }: Tokens.Code) {
+      const language = lang?.split(/\s+/)[0] ?? ''
+      const highlighted = language && hljs.getLanguage(language)
+        ? hljs.highlight(text, { language, ignoreIllegals: true }).value
+        : hljs.highlightAuto(text).value
+      const languageClass = language ? ` language-${language}` : ''
+
+      return `<pre><code class="hljs${languageClass}">${highlighted}</code></pre>`
+    },
+  },
+})
+
+const renderArticleMarkdown = (content: string) => articleMarkdown.parse(content)
+
 const ContactIcon = ({ id }: { id: 'linkedin' | 'github' | 'email' }) => {
   switch (id) {
     case 'linkedin':
@@ -291,12 +310,13 @@ function App() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [activeBlogFilter, setActiveBlogFilter] = useState<string>('All Blogs')
 
-  const selectedPost = blogPosts.find((post) => post.id === selectedPostId) ?? null
-  const blogFilterOptions = ['All Blogs', ...new Set(blogPosts.flatMap((post) => post.tags.filter((tag) => tag.toLowerCase() !== 'blog')))]
+  const selectedPost = selectedPostId ? loadBlogPostById(selectedPostId) : null
+  const isBlogSectionActive = activeView === 'blog' || activeView === 'blogArticle'
+  const blogFilterOptions = ['All Blogs', ...new Set(blogSummaries.flatMap((post) => post.tags.filter((tag) => tag.toLowerCase() !== 'blog')))]
   const filteredBlogPosts =
     activeBlogFilter === 'All Blogs'
-      ? blogPosts
-      : blogPosts.filter((post) => post.tags.some((tag) => tag === activeBlogFilter))
+      ? blogSummaries
+      : blogSummaries.filter((post) => post.tags.some((tag) => tag === activeBlogFilter))
   const featuredBlog = filteredBlogPosts[0] ?? null
   const sideBlog = filteredBlogPosts[1] ?? null
   const compactBlogs = filteredBlogPosts.slice(2, 5)
@@ -304,7 +324,7 @@ function App() {
 
   const navigate = (view: View) => {
     setActiveView(view)
-    if (view !== 'blog') {
+    if (view !== 'blogArticle') {
       setSelectedPostId(null)
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -312,10 +332,12 @@ function App() {
 
   const openBlog = (id: string) => {
     setSelectedPostId(id)
+    setActiveView('blogArticle')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const closeBlog = () => {
+    setActiveView('blog')
     setSelectedPostId(null)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -334,7 +356,7 @@ function App() {
             <button
               key={item.id}
               type="button"
-              className={`nav-link ${activeView === item.id ? 'is-active' : ''}`}
+              className={`nav-link ${((item.id === 'blog' && isBlogSectionActive) || activeView === item.id) ? 'is-active' : ''}`}
               onClick={() => navigate(item.id)}
             >
               {item.label}
@@ -684,7 +706,7 @@ function App() {
           </>
         )}
 
-        {activeView === 'blog' && !selectedPost && (
+        {activeView === 'blog' && (
           <>
             <section className="blog-intro">
               <span className="eyebrow">Engineering Log v2.4</span>
@@ -830,7 +852,7 @@ function App() {
           </>
         )}
 
-        {activeView === 'blog' && selectedPost && (
+        {activeView === 'blogArticle' && selectedPost && (
           <article className="article-shell">
             <button type="button" className="back-link" onClick={closeBlog}>
               Back to Blog
@@ -885,10 +907,16 @@ function App() {
               </section>
             )}
 
-            <div
-              className="article-content markdown-content"
-              dangerouslySetInnerHTML={{ __html: marked.parse(selectedPost.content) as string }}
-            />
+            {selectedPost.content.trim() ? (
+              <div
+                className="article-content markdown-content"
+                dangerouslySetInnerHTML={{ __html: renderArticleMarkdown(selectedPost.content) as string }}
+              />
+            ) : (
+              <div className="article-content article-empty-state">
+                <p>No article content found in this post&apos;s `blog.md` yet.</p>
+              </div>
+            )}
 
             <section className="article-author-panel">
               <div className="article-author-panel-avatar">

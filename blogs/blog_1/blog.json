@@ -1,0 +1,11 @@
+{
+    "title": "Blog WIP",
+    "description": "This is a work in progress.",
+    "labels": [
+        "blog",
+        "wip"
+    ],
+    "timeToRead": 5,
+    "displayImage": true,
+    "date": "2026-04-02"
+}

@@ -31,8 +31,8 @@ const experiences: Experience[] = [
     company: 'sFox',
     period: 'February 2024 - Present',
     summary:
-      'Building critical wallet infrastructure, transaction signing systems, and compliance capabilities for a crypto OTC exchange operating across multiple regions.',
-    technologies: ['Go', 'Node.js', 'TypeScript', 'Bitcoin', 'Polkadot', 'Cosmos SDK', 'HSM', 'PKCS#11'],
+      'Building critical Payments infrastructer, transaction signing systems, and travel rule (AML / KYC) capabilities for a crypto OTC exchange operating across multiple regions.',
+    technologies: ['Go', 'Node.js', 'TypeScript', 'Kubernetes', 'Blockchain', 'HSM', 'PKCS#11'],
     points: [
       'Integrated wallet backend services with the Coinbase TRUST network for compliant KYC data exchange.',
       'Designed and implemented a Bitcoin signing system in Go using HSM and PKCS#11 for production wallet flows.',
@@ -285,21 +285,21 @@ const ContactIcon = ({ id }: { id: 'linkedin' | 'github' | 'email' }) => {
 const skillAreas = [
   {
     title: 'Distributed Systems',
-    text: 'Designing resilient backends, event flows, and service boundaries for systems that need to stay operational under pressure.',
+    text: 'Designing resilient backends, event flows, and service boundaries for payments systems that handle thousand of transactions every day.',
     accent: 'primary',
   },
   {
     title: 'Blockchain Infrastructure',
-    text: 'Wallets, signing systems, staking flows, compliance integrations, and blockchain node operations.',
+    text: 'Wallets, signing systems, encryption, staking flows, compliance integrations, and blockchain node operations.',
     accent: 'tertiary',
   },
   {
     title: 'AI Automation',
-    text: 'Operational assistants, OCR pipelines, and chat-based workflows that connect models to business systems.',
+    text: 'Operational assistants, OCR pipelines, and chat-based workflows for customers across different industries.',
     accent: 'primary',
   },
   {
-    title: 'Technical Leadership',
+    title: 'Entrepreneurship & Leadership',
     text: 'Cross-team delivery, mentoring, architectural decisions, and practical execution in ambiguous environments.',
     accent: 'tertiary',
   },
@@ -379,12 +379,11 @@ function App() {
               <div className="hero-copy">
                 <span className="eyebrow">Distributed Systems • Blockchain • AI Automation</span>
                 <h1>
-                  Engineering <span>reliable systems</span> for products that cannot afford fragile
-                  infrastructure.
+                  <span>World class</span> engineering for the products of tomorrow.
                 </h1>
                 <p className="hero-text">
-                  Informatics engineer from Argentina with experience across fintech, blockchain,
-                  internal platforms, research-driven product teams, and operational AI systems.
+                  Informatics engineer with +7 years of experience across Fintech, Blockchain,
+                  Product, Research and development, Payments Infrastructure and AI Bots.
                 </p>
                 <div className="hero-actions">
                   <button type="button" className="primary-action" onClick={() => navigate('cv')}>
@@ -413,12 +412,12 @@ function App() {
                 <div className="hero-meta">
                   <div>
                     <span className="meta-label">Current focus</span>
-                    <strong>Wallet infrastructure, compliance, and AI automation</strong>
+                    <strong>Payments infrastructure, compliance, and AI automation</strong>
                   </div>
-                  <div>
+                  {/* <div>
                     <span className="meta-label">Based in</span>
                     <strong>Buenos Aires, Argentina</strong>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -448,16 +447,16 @@ function App() {
 
             <section className="highlight-strip">
               <div className="metric-card">
-                <span className="metric-value">6+</span>
-                <span className="metric-label">Roles across startups, enterprise, education, and consulting</span>
+                <span className="metric-value">7+ YoE</span>
+                <span className="metric-label">+7 Years of experience across startups, enterprise, education, and consulting</span>
               </div>
               <div className="metric-card">
                 <span className="metric-value">2</span>
-                <span className="metric-label">Patents tied to distributed systems and testing automation</span>
+                <span className="metric-label">Research patents tied to distributed systems and testing automation</span>
               </div>
               <div className="metric-card">
-                <span className="metric-value">1</span>
-                <span className="metric-label">Consultancy building AI systems for real business operations</span>
+                <span className="metric-value">+3 Products</span>
+                <span className="metric-label">Delivered up to 3 products related to AI systems for real business operations</span>
               </div>
             </section>
           </>
@@ -467,10 +466,9 @@ function App() {
           <>
             <section className="page-intro">
               <span className="eyebrow">Curriculum Vitae</span>
-              <h1>Experience, education, awards, and patents.</h1>
+              <h1>Engineer, Inventor, Educator.</h1>
               <p>
-                The content here comes from your current portfolio data, reorganized to match the
-                new visual direction from the reference views.
+                Carlos is a person driven by challenge and Innovation. With a wide range of experience across different roles, induestries and technologies, he is a polyglot engineer, entrepreneur and team player. He thrives in dynamic environments and is always looking to improve and reflect on his work.
               </p>
               <div className="contact-links-row">
                 {contactLinks.map((link) => (
@@ -700,8 +698,7 @@ function App() {
 
             <section className="quote-panel">
               <p>
-                Complexity is only justified when it protects a real business or systems invariant.
-                Otherwise it is just expensive decoration.
+                The best engineering work is the one that is simple and easy to understand, yet powerful and robust.
               </p>
             </section>
           </>

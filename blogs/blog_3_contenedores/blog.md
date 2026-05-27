@@ -6,7 +6,7 @@
 
     En todos mis trabajos excepto en J.P. Morgan donde trabajábamos con un sistema legacy, usar Docker o alguna alternativa ha sido el estandarte. Y si bien entendía la "teoría" del porqué es genial.
 
-    No fue hasta que tuve que hacerme cargo de la infraestructura por mi cuenta que comprendí el fanatismo de los contenedores. En mis primeros trabajos Freelance, mis implementaciones corrían arriba de una VPS con Linux, donde configuraba manualmente las reglas de networking con nginx, configuraba los firewalls, configuraba el administrador de procesos y logs.
+    No fue hasta que tuve que hacerme cargo de la infraestructura por mi cuenta que comprendí el fanatismo de los contenedores. En mis primeros trabajos Freelance, mis implementaciones corrían arriba de una VPS con Linux, donde configuraba maa nualmente las reglas de networking con nginx, configuraba los firewalls, configuraba el administrador de procesos y logs.
 
     Mi motivación principal de hacerlo así era la creencia de que era más fácil, ya que eran API rest sencillas de mantener y al usar Linux como sistema operativo nativo, me siento cómodo en él. Que equivocado estaba :) 
 

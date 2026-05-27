@@ -1,0 +1,12 @@
+{
+    "title": "Primero contenedores, luego pienso.",
+    "description": "Explicacion del hype por Docker y contenedores desde la perspectiva de un desarrollador.",
+    "labels": [
+        "engineering",  
+        "devops",
+        "infra"
+    ],
+    "timeToRead": 10,
+    "displayImage": true,
+    "date": "2026-05-27"
+}

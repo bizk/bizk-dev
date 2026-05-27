@@ -999,10 +999,10 @@ function App() {
       </main>
 
       <footer className="site-footer">
-        <div>
+        {/* <div>
           <span className="brand-kicker">Portfolio System</span>
           <strong>Built around the UI direction from `tmp`.</strong>
-        </div>
+        </div> */}
         <div className="footer-links">
           <button type="button" onClick={() => navigate('home')}>
             Home

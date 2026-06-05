@@ -1,0 +1,11 @@
+{
+  "title": "Blockchain Node Infrastructure",
+  "category": "Infrastructure",
+  "summary": "Operations and deployment backbone for Cosmos and Zcash nodes using declarative infrastructure workflows.",
+  "impact": "Improved maintainability and consistency of blockchain node environments.",
+  "technologies": ["Go", "Kubernetes", "Earthly", "ArgoCD", "Zcash", "Cosmos"],
+  "featured": false,
+  "displayImage": false,
+  "display": false,
+  "order": 6
+}

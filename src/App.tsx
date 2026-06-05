@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/a11y-dark.css'
 import { Marked, type Tokens } from 'marked'
 import './App.css'
 import { loadBlogPostById, loadBlogSummaries } from './utils/blogs'
+import { loadProjects, loadProjectById, type ProjectArticle } from './utils/projects'
 
-type View = 'home' | 'cv' | 'projects' | 'blog' | 'blogArticle'
+type View = 'home' | 'cv' | 'projects' | 'blog' | 'blogArticle' | 'projectArticle'
 
 type Experience = {
   role: string
@@ -14,15 +15,6 @@ type Experience = {
   summary: string
   technologies: string[]
   points: string[]
-}
-
-type Project = {
-  title: string
-  category: string
-  summary: string
-  impact: string
-  technologies: string[]
-  featured?: boolean
 }
 
 const experiences: Experience[] = [
@@ -107,7 +99,15 @@ const experiences: Experience[] = [
   },
 ]
 
-const projects: Project[] = [
+const projects = loadProjects()
+const blogSummaries = loadBlogSummaries()
+// const technicalBlogs = blogSummaries.filter((post) => post.tags.includes('engineering'))
+const projectBlogs = blogSummaries.filter((post) => post.tags.includes('project') || post.category.toLowerCase() === 'project')
+
+// Legacy hardcoded projects (replaced by loadProjects() - can be moved to projects/ folder)
+// Commented out to avoid TypeScript unused variable warning
+/*
+const _legacyProjects = [
   {
     title: 'Ventify',
     category: 'AI Operations',
@@ -159,8 +159,7 @@ const projects: Project[] = [
     technologies: ['Go', 'Kubernetes', 'Earthly', 'ArgoCD', 'Zcash', 'Cosmos'],
   },
 ]
-
-const blogSummaries = loadBlogSummaries()
+*/
 
 const education = [
   {
@@ -308,9 +307,11 @@ const skillAreas = [
 function App() {
   const [activeView, setActiveView] = useState<View>('home')
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [activeBlogFilter, setActiveBlogFilter] = useState<string>('All Blogs')
 
   const selectedPost = selectedPostId ? loadBlogPostById(selectedPostId) : null
+  const [selectedProject, setSelectedProject] = useState<ProjectArticle | null>(null)
   const isBlogSectionActive = activeView === 'blog' || activeView === 'blogArticle'
   const blogFilterOptions = ['All Blogs', ...new Set(blogSummaries.flatMap((post) => post.tags.filter((tag) => tag.toLowerCase() !== 'blog')))]
   const filteredBlogPosts =
@@ -342,6 +343,27 @@ function App() {
     setSelectedPostId(null)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  const openProject = (id: string) => {
+    setSelectedProjectId(id)
+    setActiveView('projectArticle')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const closeProject = () => {
+    setActiveView('projects')
+    setSelectedProjectId(null)
+    setSelectedProject(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    if (selectedProjectId) {
+      loadProjectById(selectedProjectId).then((project) => {
+        setSelectedProject(project)
+      })
+    }
+  }, [selectedProjectId])
 
   return (
     <div className="app-shell">
@@ -447,16 +469,16 @@ function App() {
 
             <section className="highlight-strip">
               <div className="metric-card">
-                <span className="metric-value">7+ YoE</span>
-                <span className="metric-label">+7 Years of experience across startups, enterprise, education, and consulting</span>
+                <span className="metric-value">+7 Years</span>
+                <span className="metric-label">Work experience in startups, enterprise, education, and consulting</span>
               </div>
               <div className="metric-card">
-                <span className="metric-value">2</span>
-                <span className="metric-label">Research patents tied to distributed systems and testing automation</span>
+                <span className="metric-value">2 Patents</span>
+                <span className="metric-label">Research patents related to distributed systems and testing automation</span>
               </div>
               <div className="metric-card">
                 <span className="metric-value">+3 Products</span>
-                <span className="metric-label">Delivered up to 3 products related to AI systems for real business operations</span>
+                <span className="metric-label">Delivered up to 3 products related to AI automation, OCR and chat-based workflows</span>
               </div>
             </section>
           </>
@@ -466,9 +488,9 @@ function App() {
           <>
             <section className="page-intro">
               <span className="eyebrow">Curriculum Vitae</span>
-              <h1>Engineer, Inventor, Educator.</h1>
+              <h1>Who am I?</h1>
               <p>
-                Carlos is a person driven by challenge and Innovation. With a wide range of experience across different roles, induestries and technologies, he is a polyglot engineer, entrepreneur and team player. He thrives in dynamic environments and is always looking to improve and reflect on his work.
+                I'm a person driven by challenge and Innovation. With a wide range of experience across different roles, induestries and technologies, I'm a polyglot engineer, entrepreneur and team player. I thrive in dynamic environments and am always looking to improve and reflect on my work.
               </p>
               <div className="contact-links-row">
                 {contactLinks.map((link) => (
@@ -583,137 +605,311 @@ function App() {
               <h1>Projects</h1>
               <div className="projects-intro-line" />
               <p>
-                Architecting distributed systems, fintech backends, and production AI workflows. A
-                selection of implementations focused on reliability, compliance, and throughput.
+                A collection of experiences, side projects and experiments from my career.
               </p>
             </section>
 
-            <section className="projects-grid">
-              <article className="project-feature project-feature-left">
-                <div className="project-feature-copy">
-                  <div>
-                    <span className="card-tag">{projects[0].category}</span>
-                    <h2>{projects[0].title}</h2>
-                    <p>{projects[0].summary}</p>
-                  </div>
-                  <div className="project-feature-footer">
-                    <strong>{projects[0].impact}</strong>
+            {projectBlogs.length > 0 && (
+              <>
+                <section className="page-intro">
+                  <span className="eyebrow">Project Insights</span>
+                  <h2>Behind the Build</h2>
+                  <p>
+                    Detailed write-ups exploring the architecture, challenges, and lessons learned from real-world project implementations.
+                  </p>
+                </section>
+
+                <section className="blog-grid">
+                  {projectBlogs.slice(0, 1).map((post) => (
+                    <button
+                      key={post.id}
+                      type="button"
+                      className="blog-feature-card blog-card-clickable"
+                      onClick={() => openBlog(post.id)}
+                    >
+                      <div
+                        className="blog-feature-visual"
+                        style={post.imageUrl ? { backgroundImage: `url(${post.imageUrl})` } : undefined}
+                      >
+                        <div className="blog-visual-overlay" />
+                      </div>
+                      <div className="blog-feature-copy">
+                        <div className="blog-card-meta">
+                          <span className="card-tag">Project</span>
+                          <span>{post.date}</span>
+                        </div>
+                        <h2>{post.title}</h2>
+                        <p>{post.summary}</p>
+                        <div className="blog-feature-footer">
+                          <div className="blog-context-cluster">
+                            <span className="blog-context-icon" aria-hidden="true">
+                              ≈
+                            </span>
+                            <span className="blog-card-context">{post.category}</span>
+                          </div>
+                          <span className="text-action">Read Article →</span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+
+                  {projectBlogs.slice(1, 2).map((post) => (
+                    <button
+                      key={post.id}
+                      type="button"
+                      className="blog-side-card blog-card-clickable"
+                      onClick={() => openBlog(post.id)}
+                    >
+                      <div>
+                        <div className="blog-card-meta">
+                          <span className="card-tag card-tag-primary">{post.category}</span>
+                          <span>{post.date}</span>
+                        </div>
+                        <h3>{post.title}</h3>
+                        <p>{post.summary}</p>
+                      </div>
+                      <div className="blog-side-footer">
+                        <div className="blog-side-tags">
+                          {post.tags.slice(0, 3).map((tag) => (
+                            <span key={`${post.id}-${tag}`} className="blog-side-pill">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <span className="text-action">Read Article →</span>
+                      </div>
+                    </button>
+                  ))}
+
+                  {projectBlogs.slice(2, 5).map((post) => (
+                    <button
+                      key={post.id}
+                      type="button"
+                      className="blog-compact-card blog-card-clickable"
+                      onClick={() => openBlog(post.id)}
+                    >
+                      <div className="blog-compact-body">
+                        <span className="card-tag">{post.category}</span>
+                        <h3>{post.title}</h3>
+                        <p>{post.summary}</p>
+                      </div>
+                      <div className="blog-compact-meta">
+                        <span>{post.date}</span>
+                        <span>{post.tags[0] ?? post.category}</span>
+                      </div>
+                    </button>
+                  ))}
+
+                  {projectBlogs.length > 5 && projectBlogs.slice(5, 6).map((post) => (
+                    <button
+                      key={post.id}
+                      type="button"
+                      className="blog-wide-card blog-card-clickable"
+                      onClick={() => openBlog(post.id)}
+                    >
+                      <div
+                        className="blog-wide-visual"
+                        style={post.imageUrl ? { backgroundImage: `url(${post.imageUrl})` } : undefined}
+                      >
+                        <div className="blog-visual-overlay" />
+                      </div>
+                      <div className="blog-wide-copy">
+                        <div className="blog-card-meta">
+                          <span className="card-tag">Deep Dive</span>
+                          <span>{post.date}</span>
+                        </div>
+                        <h2>{post.title}</h2>
+                        <p>{post.summary}</p>
+                        <div className="blog-wide-footer">
+                          <span className="blog-card-context">Project case study • {post.readTime}</span>
+                          <span className="text-action">Read Article →</span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </section>
+
+                {projectBlogs.length > 6 && (
+                  <section className="blog-pagination">
+                    <button
+                      type="button"
+                      className="blog-page-button secondary-action"
+                      onClick={() => {
+                        navigate('blog')
+                        setActiveBlogFilter('project')
+                      }}
+                    >
+                      View All Project Articles →
+                    </button>
+                  </section>
+                )}
+              </>
+            )}
+
+{projects.length > 0 && (
+              <section className="projects-grid">
+                {projects[0] && (
+                  <button
+                    type="button"
+                    className="project-feature project-feature-left blog-card-clickable"
+                    onClick={() => openProject(projects[0].id)}
+                  >
+                    <div className="project-feature-copy">
+                      <div>
+                        <span className="card-tag">{projects[0].category}</span>
+                        <h2>{projects[0].title}</h2>
+                        <p>{projects[0].summary}</p>
+                      </div>
+                      <div className="project-feature-footer">
+                        <strong>{projects[0].impact}</strong>
+                        <div className="pill-row">
+                          {projects[0].technologies.map((technology) => (
+                            <span key={`${projects[0].title}-${technology}`} className="pill">
+                              {technology}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="project-feature-visual project-visual-emerald"
+                      style={projects[0].showImage && projects[0].imageUrl ? { backgroundImage: `url(${projects[0].imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+                    />
+                  </button>
+                )}
+
+                {projects[1] && (
+                  <button
+                    type="button"
+                    className="project-side-card blog-card-clickable"
+                    onClick={() => openProject(projects[1].id)}
+                  >
+                    <div>
+                      <span className="card-tag">{projects[1].category}</span>
+                      <h2>{projects[1].title}</h2>
+                      <p>{projects[1].summary}</p>
+                    </div>
+                    <div className="project-side-footer">
+                      <strong>{projects[1].impact}</strong>
+                      <div className="pill-row">
+                        {projects[1].technologies.map((technology) => (
+                          <span key={`${projects[1].title}-${technology}`} className="pill">
+                            {technology}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </button>
+                )}
+
+                {projects[2] && (
+                  <button
+                    type="button"
+                    className="project-side-card project-side-card-alt blog-card-clickable"
+                    onClick={() => openProject(projects[2].id)}
+                  >
+                    <div>
+                      <span className="card-tag">{projects[2].category}</span>
+                      <h2>{projects[2].title}</h2>
+                      <p>{projects[2].summary}</p>
+                    </div>
+                    <div className="project-side-footer">
+                      <strong>{projects[2].impact}</strong>
+                      <div className="pill-row">
+                        {projects[2].technologies.map((technology) => (
+                          <span key={`${projects[2].title}-${technology}`} className="pill">
+                            {technology}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </button>
+                )}
+
+                {projects[3] && (
+                  <button
+                    type="button"
+                    className="project-feature project-feature-right blog-card-clickable"
+                    onClick={() => openProject(projects[3].id)}
+                  >
+                    <div className="project-feature-copy">
+                      <div>
+                        <span className="card-tag">{projects[3].category}</span>
+                        <h2>{projects[3].title}</h2>
+                        <p>{projects[3].summary}</p>
+                      </div>
+                      <div className="project-feature-footer">
+                        <strong>{projects[3].impact}</strong>
+                        <div className="pill-row">
+                          {projects[3].technologies.map((technology) => (
+                            <span key={`${projects[3].title}-${technology}`} className="pill">
+                              {technology}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="project-feature-visual project-visual-blue"
+                      style={projects[3].showImage && projects[3].imageUrl ? { backgroundImage: `url(${projects[3].imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+                    />
+                  </button>
+                )}
+
+                {projects[4] && (
+                  <button
+                    type="button"
+                    className="project-standard-card blog-card-clickable"
+                    onClick={() => openProject(projects[4].id)}
+                  >
+                    <span className="card-tag">{projects[4].category}</span>
+                    <h2>{projects[4].title}</h2>
+                    <p>{projects[4].summary}</p>
+                    <strong>{projects[4].impact}</strong>
                     <div className="pill-row">
-                      {projects[0].technologies.map((technology) => (
-                        <span key={`${projects[0].title}-${technology}`} className="pill">
+                      {projects[4].technologies.map((technology) => (
+                        <span key={`${projects[4].title}-${technology}`} className="pill">
                           {technology}
                         </span>
                       ))}
                     </div>
-                  </div>
-                </div>
-                <div className="project-feature-visual project-visual-emerald" />
-              </article>
+                  </button>
+                )}
 
-              <article className="project-side-card">
-                <div>
-                  <span className="card-tag">{projects[1].category}</span>
-                  <h2>{projects[1].title}</h2>
-                  <p>{projects[1].summary}</p>
-                </div>
-                <div className="project-side-footer">
-                  <strong>{projects[1].impact}</strong>
-                  <div className="pill-row">
-                    {projects[1].technologies.map((technology) => (
-                      <span key={`${projects[1].title}-${technology}`} className="pill">
-                        {technology}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </article>
-
-              <article className="project-side-card project-side-card-alt">
-                <div>
-                  <span className="card-tag">{projects[2].category}</span>
-                  <h2>{projects[2].title}</h2>
-                  <p>{projects[2].summary}</p>
-                </div>
-                <div className="project-side-footer">
-                  <strong>{projects[2].impact}</strong>
-                  <div className="pill-row">
-                    {projects[2].technologies.map((technology) => (
-                      <span key={`${projects[2].title}-${technology}`} className="pill">
-                        {technology}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </article>
-
-              <article className="project-feature project-feature-right">
-                <div className="project-feature-copy">
-                  <div>
-                    <span className="card-tag">{projects[3].category}</span>
-                    <h2>{projects[3].title}</h2>
-                    <p>{projects[3].summary}</p>
-                  </div>
-                  <div className="project-feature-footer">
-                    <strong>{projects[3].impact}</strong>
+                {projects[5] && (
+                  <button
+                    type="button"
+                    className="project-standard-card blog-card-clickable"
+                    onClick={() => openProject(projects[5].id)}
+                  >
+                    <span className="card-tag">{projects[5].category}</span>
+                    <h2>{projects[5].title}</h2>
+                    <p>{projects[5].summary}</p>
+                    <strong>{projects[5].impact}</strong>
                     <div className="pill-row">
-                      {projects[3].technologies.map((technology) => (
-                        <span key={`${projects[3].title}-${technology}`} className="pill">
+                      {projects[5].technologies.map((technology) => (
+                        <span key={`${projects[5].title}-${technology}`} className="pill">
                           {technology}
                         </span>
                       ))}
                     </div>
-                  </div>
-                </div>
-                <div className="project-feature-visual project-visual-blue" />
-              </article>
-
-              <article className="project-standard-card">
-                <span className="card-tag">{projects[4].category}</span>
-                <h2>{projects[4].title}</h2>
-                <p>{projects[4].summary}</p>
-                <strong>{projects[4].impact}</strong>
-                <div className="pill-row">
-                  {projects[4].technologies.map((technology) => (
-                    <span key={`${projects[4].title}-${technology}`} className="pill">
-                      {technology}
-                    </span>
-                  ))}
-                </div>
-              </article>
-
-              <article className="project-standard-card">
-                <span className="card-tag">{projects[5].category}</span>
-                <h2>{projects[5].title}</h2>
-                <p>{projects[5].summary}</p>
-                <strong>{projects[5].impact}</strong>
-                <div className="pill-row">
-                  {projects[5].technologies.map((technology) => (
-                    <span key={`${projects[5].title}-${technology}`} className="pill">
-                      {technology}
-                    </span>
-                  ))}
-                </div>
-              </article>
-            </section>
-
-            <section className="quote-panel">
-              <p>
-                The best engineering work is the one that is simple and easy to understand, yet powerful and robust.
-              </p>
-            </section>
+                  </button>
+                )}
+              </section>
+            )}
           </>
+
         )}
 
         {activeView === 'blog' && (
           <>
             <section className="blog-intro">
-              <span className="eyebrow">Engineering Log v2.4</span>
-              <h1>
-                Insights on distributed <span>systems</span> and scalability
-              </h1>
+              <span className="eyebrow">Thoughts on life, technology and the future</span>
               <p>
-                Documenting architectural decisions, performance bottlenecks, and infrastructure
-                patterns encountered in large-scale production environments.
+                These entries are a collection of thoughts, reflections, learnings and insights from my life and career.
+                My intention is to leave a piece of value on the bast internet ocean to whoever might find it useful.
+                I'm not a writer, these entries are written as is.
+                Thanks for being here.
               </p>
             </section>
 
@@ -897,7 +1093,7 @@ function App() {
                   </div>
                   <div>
                     <p>Carlos Santiago Yanzon</p>
-                    <span>Senior Engineer</span>
+                    <span>Software Engineer</span>
                   </div>
                 </div>
                 <div className="article-meta-divider" aria-hidden="true" />
@@ -947,13 +1143,144 @@ function App() {
               <div className="article-author-panel-copy">
                 <h4>Carlos Santiago Yanzon</h4>
                 <p>
-                  Senior engineer focused on distributed systems, blockchain infrastructure, and AI
+                  Software Engineer focused on distributed systems, blockchain infrastructure, and AI
                   automation for real operational workflows.
                 </p>
                 <div className="contact-links-row">
                   {contactLinks.map((link) => (
                     <a
                       key={`article-${link.label}`}
+                      className="contact-link-button"
+                      href={link.href}
+                      target={link.href.startsWith('http') ? '_blank' : undefined}
+                      rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
+                      aria-label={link.label}
+                      title={link.label}
+                    >
+                      <ContactIcon id={link.id} />
+                      <span className="sr-only">{link.label}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section className="article-cta">
+              <div className="article-cta-inner">
+                <h3>Need help with a complex system that has to scale reliably?</h3>
+                <p>
+                  Available for consulting on backend architecture, distributed systems design, and
+                  production engineering.
+                </p>
+                <div className="article-cta-actions">
+                  <a className="primary-action article-cta-link" href="mailto:carlosyanzon@protonmail.com">
+                    Send Email
+                  </a>
+                  <a
+                    className="secondary-action article-cta-link"
+                    href="https://www.linkedin.com/in/carlos-santiago-yanzon/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Chat on LinkedIn
+                  </a>
+                </div>
+              </div>
+            </section>
+          </article>
+        )}
+
+        {activeView === 'projectArticle' && selectedProject && (
+          <article className="article-shell">
+            <button type="button" className="back-link" onClick={closeProject}>
+              Back to Projects
+            </button>
+
+            <nav className="article-breadcrumbs" aria-label="Breadcrumb">
+              <button type="button" className="article-breadcrumb-link" onClick={closeProject}>
+                Projects
+              </button>
+              <span className="article-breadcrumb-separator">›</span>
+              <span>{selectedProject.category}</span>
+            </nav>
+
+            <header className="article-header">
+              <h1>{selectedProject.title}</h1>
+              <div className="article-meta-bar">
+                <div className="article-author">
+                  <div className="article-author-avatar">
+                    <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
+                  </div>
+                  <div>
+                    <p>Carlos Santiago Yanzon</p>
+                    <span>Software Engineer</span>
+                  </div>
+                </div>
+                <div className="article-meta-divider" aria-hidden="true" />
+                <div className="article-meta">
+                  <span>{selectedProject.category}</span>
+                </div>
+                <div className="article-tag-row">
+                  {selectedProject.technologies.map((tech) => (
+                    <span key={`${selectedProject.id}-${tech}`} className="article-tag">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </header>
+
+            {selectedProject.showImage && selectedProject.imageUrl && (
+              <section className="article-image-wrap">
+                <div className="article-image-frame">
+                  <img src={selectedProject.imageUrl} alt={selectedProject.title} className="article-image" />
+                </div>
+                <div className="article-image-note">
+                  <p className="meta-label">Project Impact</p>
+                  <p>{selectedProject.impact}</p>
+                </div>
+              </section>
+            )}
+
+            {selectedProject.content && selectedProject.content.trim() ? (
+              <div
+                className="article-content markdown-content"
+                dangerouslySetInnerHTML={{ __html: renderArticleMarkdown(selectedProject.content) as string }}
+              />
+            ) : (
+              <div className="article-content article-empty-state">
+                <p>No detailed documentation found for this project yet.</p>
+                <div className="project-summary-fallback">
+                  <h3>Summary</h3>
+                  <p>{selectedProject.summary}</p>
+                  <h3>Impact</h3>
+                  <p>{selectedProject.impact}</p>
+                  <h3>Technologies</h3>
+                  <div className="pill-row">
+                    {selectedProject.technologies.map((tech) => (
+                      <span key={`fallback-${tech}`} className="pill">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <section className="article-author-panel">
+              <div className="article-author-panel-avatar">
+                <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
+              </div>
+              <div className="article-author-panel-copy">
+                <h4>Carlos Santiago Yanzon</h4>
+                <p>
+                  Software Engineer focused on distributed systems, blockchain infrastructure, and AI
+                  automation for real operational workflows.
+                </p>
+                <div className="contact-links-row">
+                  {contactLinks.map((link) => (
+                    <a
+                      key={`project-article-${link.label}`}
                       className="contact-link-button"
                       href={link.href}
                       target={link.href.startsWith('http') ? '_blank' : undefined}

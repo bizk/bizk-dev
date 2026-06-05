@@ -1,0 +1,11 @@
+{
+  "title": "Wallet Signing Infrastructure",
+  "category": "Blockchain",
+  "summary": "Secure transaction signing services for UTXO-based wallets using hardware security modules and PKCS#11 integrations.",
+  "impact": "Supports production wallet operations at high daily transaction volume.",
+  "technologies": ["Go", "Bitcoin", "HSM", "PKCS#11"],
+  "featured": false,
+  "display": false,
+  "displayImage": false,
+  "order": 2
+}

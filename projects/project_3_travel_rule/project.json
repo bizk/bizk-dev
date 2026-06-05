@@ -1,0 +1,11 @@
+{
+  "title": "Travel Rule Compliance Platform",
+  "category": "Fintech",
+  "summary": "Cross-team compliance delivery for regulated crypto flows and identity-linked transaction data exchange.",
+  "impact": "Enabled operations across the US, Europe, and Asia.",
+  "technologies": ["Node.js", "TypeScript", "Bitcoin"],
+  "featured": false,
+  "displayImage": false,
+  "display": false,
+  "order": 3
+}

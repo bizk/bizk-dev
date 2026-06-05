@@ -1,0 +1,11 @@
+{
+  "title": "Ventify",
+  "category": "AI Operations",
+  "summary": "Chat-based sales automation platform for businesses that need lead qualification, customer follow-up, and real operational workflows.",
+  "impact": "Serving multiple businesses and more than 5,000 clients weekly.",
+  "technologies": ["Node.js", "Python", "LLMs", "Redis", "WhatsApp API"],
+  "featured": false,
+  "display": false,
+  "displayImage": false,
+  "order": 1
+}

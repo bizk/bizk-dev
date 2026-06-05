@@ -1,0 +1,11 @@
+{
+  "title": "Energy Company Support Assistant",
+  "category": "Enterprise AI",
+  "summary": "WhatsApp-based LLM assistant connected to internal company software for payments, claims, and customer inquiries.",
+  "impact": "Serves over 60,000 customers monthly.",
+  "technologies": ["Node.js", "Redis", "LLMs", "MCP", "WhatsApp API"],
+  "featured": false,
+  "displayImage": false,
+  "display": false,
+  "order": 4
+}

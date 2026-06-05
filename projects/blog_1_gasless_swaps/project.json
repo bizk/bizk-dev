@@ -1,0 +1,21 @@
+{
+    "title": "Gasless swaps ETH-ERC20",
+    "category": "Blockchain | EIP-4337 | Gasless swaps | Smart contracts",
+    "summary": "How to build a gasless swap exchange for Ethereum using EIP-4337 and L2 infrastructure.",
+    "impact": "This project is a walkthrough of how sponsored transactions (EIP-4337) work on Ethereum, keeping the user experience as simple as possible.",
+    "technologies": [
+        "engineering",  
+        "web3",
+        "ethereum",
+        "smart-contracts",
+        "typescript",
+        "react"
+    ],
+    "timeToRead": 30,
+    "order": 1,
+    "displayImage": true,
+    "date": "2026-06-04",
+    "featured": true,
+    "display": true
+}
+  

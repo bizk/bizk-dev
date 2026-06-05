@@ -218,6 +218,16 @@
   gap: 12px;
 }
 
+.pill {
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgba(46, 52, 71, 0.9);
+  color: var(--color-text-soft);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .contact-links-row {
   display: flex;
   flex-wrap: wrap;
@@ -280,7 +290,10 @@
 
 .hero-meta > div strong,
 .status-card strong,
-.project-card strong {
+.project-card strong,
+button.project-feature strong,
+button.project-side-card strong,
+button.project-standard-card strong {
   display: block;
   margin-top: 6px;
   color: var(--color-text);
@@ -739,6 +752,22 @@
 .blog-card-clickable:hover {
   transform: translateY(-4px);
   border-color: rgba(78, 222, 163, 0.22);
+}
+
+button.project-feature,
+button.project-side-card,
+button.project-standard-card {
+  appearance: none;
+  border: 1px solid rgba(69, 70, 77, 0.12);
+  border-radius: 0;
+  font: inherit;
+  width: 100%;
+}
+
+button.project-feature .pill,
+button.project-side-card .pill,
+button.project-standard-card .pill {
+  color: var(--color-text-soft);
 }
 
 .blog-feature-card {

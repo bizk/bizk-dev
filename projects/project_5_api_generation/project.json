@@ -1,0 +1,11 @@
+{
+  "title": "API Model Generation from Live Traffic",
+  "category": "Platform Engineering",
+  "summary": "Patent-backed platform that inferred API models and generated test assets from production network traffic.",
+  "impact": "Generated over 15,000 tests and cut engineering time spent per test by 91%.",
+  "technologies": ["Node.js", "TypeScript", "Kubernetes"],
+  "featured": false,
+  "displayImage": false,
+  "display": false,
+  "order": 5
+}

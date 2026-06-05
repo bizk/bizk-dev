@@ -29,7 +29,7 @@ This works in mainnet and has been tested.
 
 <img title="" src="./assets/2026-06-03-16-54-37-image.png" alt="" data-align="center">
 
-> There is no such thing as "gasless"—someone else always pays. There is no free lunch in any economic system that works and lasts over time.
+> There is no such thing **as** "gasless"—someone else always pays. There is no free lunch in any economic system that works and lasts over time.
 
 ## Gasless swap flow
 

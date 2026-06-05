@@ -258,6 +258,24 @@ const articleMarkdown = new Marked({
 
 const renderArticleMarkdown = (content: string) => articleMarkdown.parse(content)
 
+const LoadingView = () => {
+  return (
+    <div className="loading-container">
+      <div className="loading-card">
+        <div className="loading-spinner">
+          <div className="spinner-ring" />
+          <div className="spinner-ring" />
+          <div className="spinner-ring" />
+        </div>
+        <div className="loading-text">
+          <span className="eyebrow">Please wait</span>
+          <h2>Loading content...</h2>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const ContactIcon = ({ id }: { id: 'linkedin' | 'github' | 'email' }) => {
   switch (id) {
     case 'linkedin':
@@ -1045,7 +1063,7 @@ function BlogArticleView() {
   }, [selectedPost])
 
   if (!selectedPost) {
-    return <div>Loading...</div>
+    return <LoadingView />
   }
 
   return (
@@ -1197,7 +1215,7 @@ function ProjectArticleView() {
   }, [selectedProject])
 
   if (!selectedProject) {
-    return <div>Loading...</div>
+    return <LoadingView />
   }
 
   return (

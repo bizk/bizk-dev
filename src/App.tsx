@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
+import { Routes, Route, Navigate, useNavigate, useParams, NavLink, useLocation } from 'react-router-dom'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/a11y-dark.css'
 import { Marked, type Tokens } from 'marked'
+import mermaid from 'mermaid'
 import './App.css'
 import { loadBlogPostById, loadBlogSummaries } from './utils/blogs'
 import { loadProjects, loadProjectById, type ProjectArticle } from './utils/projects'
+import { ShareButton } from './components/ShareButton'
 
-type View = 'home' | 'cv' | 'projects' | 'blog' | 'blogArticle' | 'projectArticle'
+// Removed View type - now using URL-based routing
 
 type Experience = {
   role: string
@@ -207,7 +210,7 @@ const patents = [
   },
 ]
 
-const navItems: { id: View; label: string }[] = [
+const navItems: { id: string; label: string }[] = [
   { id: 'home', label: 'Home' },
   { id: 'cv', label: 'CV' },
   { id: 'projects', label: 'Projects' },
@@ -237,6 +240,12 @@ const articleMarkdown = new Marked({
   renderer: {
     code({ text, lang }: Tokens.Code) {
       const language = lang?.split(/\s+/)[0] ?? ''
+
+      // Handle mermaid diagrams separately
+      if (language === 'mermaid') {
+        return `<div class="mermaid">${text}</div>`
+      }
+
       const highlighted = language && hljs.getLanguage(language)
         ? hljs.highlight(text, { language, ignoreIllegals: true }).value
         : hljs.highlightAuto(text).value
@@ -304,1045 +313,1106 @@ const skillAreas = [
   },
 ]
 
-function App() {
-  const [activeView, setActiveView] = useState<View>('home')
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
-  const [activeBlogFilter, setActiveBlogFilter] = useState<string>('All Blogs')
-
-  const selectedPost = selectedPostId ? loadBlogPostById(selectedPostId) : null
-  const [selectedProject, setSelectedProject] = useState<ProjectArticle | null>(null)
-  const isBlogSectionActive = activeView === 'blog' || activeView === 'blogArticle'
-  const blogFilterOptions = ['All Blogs', ...new Set(blogSummaries.flatMap((post) => post.tags.filter((tag) => tag.toLowerCase() !== 'blog')))]
-  const filteredBlogPosts =
-    activeBlogFilter === 'All Blogs'
-      ? blogSummaries
-      : blogSummaries.filter((post) => post.tags.some((tag) => tag === activeBlogFilter))
-  const featuredBlog = filteredBlogPosts[0] ?? null
-  const sideBlog = filteredBlogPosts[1] ?? null
-  const compactBlogs = filteredBlogPosts.slice(2, 5)
-  const wideBlog = filteredBlogPosts[5] ?? filteredBlogPosts[compactBlogs.length + 2] ?? null
-  const hasMultipleBlogPages = filteredBlogPosts.length > 6
-
-  const navigate = (view: View) => {
-    setActiveView(view)
-    if (view !== 'blogArticle') {
-      setSelectedPostId(null)
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const openBlog = (id: string) => {
-    setSelectedPostId(id)
-    setActiveView('blogArticle')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const closeBlog = () => {
-    setActiveView('blog')
-    setSelectedPostId(null)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const openProject = (id: string) => {
-    setSelectedProjectId(id)
-    setActiveView('projectArticle')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const closeProject = () => {
-    setActiveView('projects')
-    setSelectedProjectId(null)
-    setSelectedProject(null)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  useEffect(() => {
-    if (selectedProjectId) {
-      loadProjectById(selectedProjectId).then((project) => {
-        setSelectedProject(project)
-      })
-    }
-  }, [selectedProjectId])
+// View Components
+function HomeView() {
+  const navigate = useNavigate()
 
   return (
-    <div className="app-shell">
-      <div className="site-bg" />
-      <header className="topbar">
-        <div className="brand-block">
-          <span className="brand-kicker">Bizk Dev</span>
-          <span className="brand-name">Carlos Santiago Yanzon</span>
+    <>
+      <section className="hero-section">
+        <div className="hero-copy">
+          <span className="eyebrow">Distributed Systems • Blockchain • AI Automation</span>
+          <h1>
+            <span>World class</span> engineering for the products of tomorrow.
+          </h1>
+          <p className="hero-text">
+            Informatics engineer with +7 years of experience across Fintech, Blockchain,
+            Product, Research and development, Payments Infrastructure and AI Bots.
+          </p>
+          <div className="hero-actions">
+            <button type="button" className="primary-action" onClick={() => navigate('/cv')}>
+              Visit CV
+            </button>
+            <button type="button" className="secondary-action" onClick={() => navigate('/projects')}>
+              View Projects
+            </button>
+          </div>
+          <div className="contact-links-row">
+            {contactLinks.map((link) => (
+              <a
+                key={link.label}
+                className="contact-link-button"
+                href={link.href}
+                target={link.href.startsWith('http') ? '_blank' : undefined}
+                rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
+                aria-label={link.label}
+                title={link.label}
+              >
+                <ContactIcon id={link.id} />
+                <span className="sr-only">{link.label}</span>
+              </a>
+            ))}
+          </div>
+          <div className="hero-meta">
+            <div>
+              <span className="meta-label">Current focus</span>
+              <strong>Payments infrastructure, compliance, and AI automation</strong>
+            </div>
+            {/* <div>
+              <span className="meta-label">Based in</span>
+              <strong>Buenos Aires, Argentina</strong>
+            </div> */}
+          </div>
         </div>
 
-        <nav className="topnav" aria-label="Primary">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`nav-link ${((item.id === 'blog' && isBlogSectionActive) || activeView === item.id) ? 'is-active' : ''}`}
-              onClick={() => navigate(item.id)}
+        <aside className="hero-panel">
+          <div className="portrait-cluster">
+            <div className="portrait-orb">
+              <img src="/profile.jpg" alt="Carlos Santiago Yanzon" className="portrait-image" />
+            </div>
+            <div className="status-card">
+              <span className="meta-label">Profile</span>
+              <strong>Senior engineer, founder, lecturer</strong>
+              <p>Strong backend execution with an operator mindset and direct communication style.</p>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section className="bento-grid">
+        {skillAreas.map((area) => (
+          <article key={area.title} className={`bento-card accent-${area.accent}`}>
+            <span className="card-tag">{area.accent === 'primary' ? 'Core' : 'Applied'}</span>
+            <h2>{area.title}</h2>
+            <p>{area.text}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="highlight-strip">
+        <div className="metric-card">
+          <span className="metric-value">+7 Years</span>
+          <span className="metric-label">Work experience in startups, enterprise, education, and consulting</span>
+        </div>
+        <div className="metric-card">
+          <span className="metric-value">2 Patents</span>
+          <span className="metric-label">Research patents related to distributed systems and testing automation</span>
+        </div>
+        <div className="metric-card">
+          <span className="metric-value">+3 Products</span>
+          <span className="metric-label">Delivered up to 3 products related to AI automation, OCR and chat-based workflows</span>
+        </div>
+      </section>
+    </>
+  )
+}
+
+function CVView() {
+  return (
+    <>
+      <section className="page-intro">
+        <span className="eyebrow">Curriculum Vitae</span>
+        <h1>Who am I?</h1>
+        <p>
+          I'm a person driven by challenge and Innovation. With a wide range of experience across different roles, induestries and technologies, I'm a polyglot engineer, entrepreneur and team player. I thrive in dynamic environments and am always looking to improve and reflect on my work.
+        </p>
+        <div className="contact-links-row">
+          {contactLinks.map((link) => (
+            <a
+              key={`cv-${link.label}`}
+              className="contact-link-button"
+              href={link.href}
+              target={link.href.startsWith('http') ? '_blank' : undefined}
+              rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
+              aria-label={link.label}
+              title={link.label}
             >
-              {item.label}
-            </button>
+              <ContactIcon id={link.id} />
+              <span className="sr-only">{link.label}</span>
+            </a>
           ))}
-        </nav>
-
-        <div className="topbar-actions">
-          <button type="button" className="contact-button" onClick={() => navigate('cv')}>
-            Contact / CV
-          </button>
         </div>
-      </header>
+      </section>
 
-      <main className="page-shell">
-        {activeView === 'home' && (
-          <>
-            <section className="hero-section">
-              <div className="hero-copy">
-                <span className="eyebrow">Distributed Systems • Blockchain • AI Automation</span>
-                <h1>
-                  <span>World class</span> engineering for the products of tomorrow.
-                </h1>
-                <p className="hero-text">
-                  Informatics engineer with +7 years of experience across Fintech, Blockchain,
-                  Product, Research and development, Payments Infrastructure and AI Bots.
-                </p>
-                <div className="hero-actions">
-                  <button type="button" className="primary-action" onClick={() => navigate('cv')}>
-                    Visit CV
-                  </button>
-                  <button type="button" className="secondary-action" onClick={() => navigate('projects')}>
-                    View Projects
-                  </button>
+      <section className="timeline-section">
+        <div className="section-heading">
+          <h2>Experience</h2>
+          <span />
+        </div>
+        <div className="timeline-list">
+          {experiences.map((experience) => (
+            <article key={`${experience.company}-${experience.period}`} className="timeline-item">
+              <div className="timeline-meta">
+                <p>{experience.period}</p>
+                <span>{experience.role}</span>
+              </div>
+              <div className="timeline-card">
+                <div className="timeline-card-header">
+                  <h3>{experience.company}</h3>
                 </div>
-                <div className="contact-links-row">
-                  {contactLinks.map((link) => (
-                    <a
-                      key={link.label}
-                      className="contact-link-button"
-                      href={link.href}
-                      target={link.href.startsWith('http') ? '_blank' : undefined}
-                      rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
-                      aria-label={link.label}
-                      title={link.label}
-                    >
-                      <ContactIcon id={link.id} />
-                      <span className="sr-only">{link.label}</span>
-                    </a>
+                <p className="timeline-summary">{experience.summary}</p>
+                <div className="pill-row">
+                  {experience.technologies.map((technology) => (
+                    <span key={`${experience.company}-${technology}`} className="pill">
+                      {technology}
+                    </span>
                   ))}
                 </div>
-                <div className="hero-meta">
-                  <div>
-                    <span className="meta-label">Current focus</span>
-                    <strong>Payments infrastructure, compliance, and AI automation</strong>
+                <ul className="timeline-points">
+                  {experience.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="detail-grid">
+        <div>
+          <div className="section-heading">
+            <h2>Education</h2>
+            <span />
+          </div>
+          <div className="stack-list">
+            {education.map((item) => (
+              <article key={item.title} className="stack-card">
+                <span className="stack-period">{item.period}</span>
+                <h3>{item.title}</h3>
+                <p>{item.institution}</p>
+                <small>{item.note}</small>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div className="section-heading">
+            <h2>Awards</h2>
+            <span />
+          </div>
+          <div className="stack-list">
+            {awards.map((item) => (
+              <article key={item.title} className="stack-card accent-card">
+                <span className="stack-period">{item.period}</span>
+                <h3>{item.title}</h3>
+                <small>{item.note}</small>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="callout-section">
+        <div className="section-heading">
+          <h2>Patents</h2>
+          <span />
+        </div>
+        <div className="patent-grid">
+          {patents.map((patent) => (
+            <article key={patent.id} className="patent-card">
+              <span className="stack-period">{patent.id}</span>
+              <h3>{patent.title}</h3>
+              <p>{patent.note}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </>
+  )
+}
+
+function ProjectsView() {
+  const navigate = useNavigate()
+
+  return (
+    <>
+      <section className="projects-intro">
+        <span className="eyebrow">Engineering Portfolio</span>
+        <h1>Projects</h1>
+        <div className="projects-intro-line" />
+        <p>
+          A collection of experiences, side projects and experiments from my career.
+        </p>
+      </section>
+
+      {projectBlogs.length > 0 && (
+        <>
+          <section className="page-intro">
+            <span className="eyebrow">Project Insights</span>
+            <h2>Behind the Build</h2>
+            <p>
+              Detailed write-ups exploring the architecture, challenges, and lessons learned from real-world project implementations.
+            </p>
+          </section>
+
+          <section className="blog-grid">
+            {projectBlogs.slice(0, 1).map((post) => (
+              <button
+                key={post.id}
+                type="button"
+                className="blog-feature-card blog-card-clickable"
+                onClick={() => navigate(`/blog/${encodeURIComponent(post.id)}`)}
+              >
+                <div
+                  className="blog-feature-visual"
+                  style={post.imageUrl ? { backgroundImage: `url(${post.imageUrl})` } : undefined}
+                >
+                  <div className="blog-visual-overlay" />
+                </div>
+                <div className="blog-feature-copy">
+                  <div className="blog-card-meta">
+                    <span className="card-tag">Project</span>
+                    <span>{post.date}</span>
                   </div>
-                  {/* <div>
-                    <span className="meta-label">Based in</span>
-                    <strong>Buenos Aires, Argentina</strong>
-                  </div> */}
-                </div>
-              </div>
-
-              <aside className="hero-panel">
-                <div className="portrait-cluster">
-                  <div className="portrait-orb">
-                    <img src="/profile.jpg" alt="Carlos Santiago Yanzon" className="portrait-image" />
-                  </div>
-                  <div className="status-card">
-                    <span className="meta-label">Profile</span>
-                    <strong>Senior engineer, founder, lecturer</strong>
-                    <p>Strong backend execution with an operator mindset and direct communication style.</p>
+                  <h2>{post.title}</h2>
+                  <p>{post.summary}</p>
+                  <div className="blog-feature-footer">
+                    <div className="blog-context-cluster">
+                      <span className="blog-context-icon" aria-hidden="true">
+                        ≈
+                      </span>
+                      <span className="blog-card-context">{post.category}</span>
+                    </div>
+                    <span className="text-action">Read Article →</span>
                   </div>
                 </div>
-              </aside>
-            </section>
-
-            <section className="bento-grid">
-              {skillAreas.map((area) => (
-                <article key={area.title} className={`bento-card accent-${area.accent}`}>
-                  <span className="card-tag">{area.accent === 'primary' ? 'Core' : 'Applied'}</span>
-                  <h2>{area.title}</h2>
-                  <p>{area.text}</p>
-                </article>
-              ))}
-            </section>
-
-            <section className="highlight-strip">
-              <div className="metric-card">
-                <span className="metric-value">+7 Years</span>
-                <span className="metric-label">Work experience in startups, enterprise, education, and consulting</span>
-              </div>
-              <div className="metric-card">
-                <span className="metric-value">2 Patents</span>
-                <span className="metric-label">Research patents related to distributed systems and testing automation</span>
-              </div>
-              <div className="metric-card">
-                <span className="metric-value">+3 Products</span>
-                <span className="metric-label">Delivered up to 3 products related to AI automation, OCR and chat-based workflows</span>
-              </div>
-            </section>
-          </>
-        )}
-
-        {activeView === 'cv' && (
-          <>
-            <section className="page-intro">
-              <span className="eyebrow">Curriculum Vitae</span>
-              <h1>Who am I?</h1>
-              <p>
-                I'm a person driven by challenge and Innovation. With a wide range of experience across different roles, induestries and technologies, I'm a polyglot engineer, entrepreneur and team player. I thrive in dynamic environments and am always looking to improve and reflect on my work.
-              </p>
-              <div className="contact-links-row">
-                {contactLinks.map((link) => (
-                  <a
-                    key={`cv-${link.label}`}
-                    className="contact-link-button"
-                    href={link.href}
-                    target={link.href.startsWith('http') ? '_blank' : undefined}
-                    rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
-                    aria-label={link.label}
-                    title={link.label}
-                  >
-                    <ContactIcon id={link.id} />
-                    <span className="sr-only">{link.label}</span>
-                  </a>
-                ))}
-              </div>
-            </section>
-
-            <section className="timeline-section">
-              <div className="section-heading">
-                <h2>Experience</h2>
-                <span />
-              </div>
-              <div className="timeline-list">
-                {experiences.map((experience) => (
-                  <article key={`${experience.company}-${experience.period}`} className="timeline-item">
-                    <div className="timeline-meta">
-                      <p>{experience.period}</p>
-                      <span>{experience.role}</span>
-                    </div>
-                    <div className="timeline-card">
-                      <div className="timeline-card-header">
-                        <h3>{experience.company}</h3>
-                      </div>
-                      <p className="timeline-summary">{experience.summary}</p>
-                      <div className="pill-row">
-                        {experience.technologies.map((technology) => (
-                          <span key={`${experience.company}-${technology}`} className="pill">
-                            {technology}
-                          </span>
-                        ))}
-                      </div>
-                      <ul className="timeline-points">
-                        {experience.points.map((point) => (
-                          <li key={point}>{point}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <section className="detail-grid">
-              <div>
-                <div className="section-heading">
-                  <h2>Education</h2>
-                  <span />
-                </div>
-                <div className="stack-list">
-                  {education.map((item) => (
-                    <article key={item.title} className="stack-card">
-                      <span className="stack-period">{item.period}</span>
-                      <h3>{item.title}</h3>
-                      <p>{item.institution}</p>
-                      <small>{item.note}</small>
-                    </article>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="section-heading">
-                  <h2>Awards</h2>
-                  <span />
-                </div>
-                <div className="stack-list">
-                  {awards.map((item) => (
-                    <article key={item.title} className="stack-card accent-card">
-                      <span className="stack-period">{item.period}</span>
-                      <h3>{item.title}</h3>
-                      <small>{item.note}</small>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section className="callout-section">
-              <div className="section-heading">
-                <h2>Patents</h2>
-                <span />
-              </div>
-              <div className="patent-grid">
-                {patents.map((patent) => (
-                  <article key={patent.id} className="patent-card">
-                    <span className="stack-period">{patent.id}</span>
-                    <h3>{patent.title}</h3>
-                    <p>{patent.note}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          </>
-        )}
-
-        {activeView === 'projects' && (
-          <>
-            <section className="projects-intro">
-              <span className="eyebrow">Engineering Portfolio</span>
-              <h1>Projects</h1>
-              <div className="projects-intro-line" />
-              <p>
-                A collection of experiences, side projects and experiments from my career.
-              </p>
-            </section>
-
-            {projectBlogs.length > 0 && (
-              <>
-                <section className="page-intro">
-                  <span className="eyebrow">Project Insights</span>
-                  <h2>Behind the Build</h2>
-                  <p>
-                    Detailed write-ups exploring the architecture, challenges, and lessons learned from real-world project implementations.
-                  </p>
-                </section>
-
-                <section className="blog-grid">
-                  {projectBlogs.slice(0, 1).map((post) => (
-                    <button
-                      key={post.id}
-                      type="button"
-                      className="blog-feature-card blog-card-clickable"
-                      onClick={() => openBlog(post.id)}
-                    >
-                      <div
-                        className="blog-feature-visual"
-                        style={post.imageUrl ? { backgroundImage: `url(${post.imageUrl})` } : undefined}
-                      >
-                        <div className="blog-visual-overlay" />
-                      </div>
-                      <div className="blog-feature-copy">
-                        <div className="blog-card-meta">
-                          <span className="card-tag">Project</span>
-                          <span>{post.date}</span>
-                        </div>
-                        <h2>{post.title}</h2>
-                        <p>{post.summary}</p>
-                        <div className="blog-feature-footer">
-                          <div className="blog-context-cluster">
-                            <span className="blog-context-icon" aria-hidden="true">
-                              ≈
-                            </span>
-                            <span className="blog-card-context">{post.category}</span>
-                          </div>
-                          <span className="text-action">Read Article →</span>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-
-                  {projectBlogs.slice(1, 2).map((post) => (
-                    <button
-                      key={post.id}
-                      type="button"
-                      className="blog-side-card blog-card-clickable"
-                      onClick={() => openBlog(post.id)}
-                    >
-                      <div>
-                        <div className="blog-card-meta">
-                          <span className="card-tag card-tag-primary">{post.category}</span>
-                          <span>{post.date}</span>
-                        </div>
-                        <h3>{post.title}</h3>
-                        <p>{post.summary}</p>
-                      </div>
-                      <div className="blog-side-footer">
-                        <div className="blog-side-tags">
-                          {post.tags.slice(0, 3).map((tag) => (
-                            <span key={`${post.id}-${tag}`} className="blog-side-pill">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <span className="text-action">Read Article →</span>
-                      </div>
-                    </button>
-                  ))}
-
-                  {projectBlogs.slice(2, 5).map((post) => (
-                    <button
-                      key={post.id}
-                      type="button"
-                      className="blog-compact-card blog-card-clickable"
-                      onClick={() => openBlog(post.id)}
-                    >
-                      <div className="blog-compact-body">
-                        <span className="card-tag">{post.category}</span>
-                        <h3>{post.title}</h3>
-                        <p>{post.summary}</p>
-                      </div>
-                      <div className="blog-compact-meta">
-                        <span>{post.date}</span>
-                        <span>{post.tags[0] ?? post.category}</span>
-                      </div>
-                    </button>
-                  ))}
-
-                  {projectBlogs.length > 5 && projectBlogs.slice(5, 6).map((post) => (
-                    <button
-                      key={post.id}
-                      type="button"
-                      className="blog-wide-card blog-card-clickable"
-                      onClick={() => openBlog(post.id)}
-                    >
-                      <div
-                        className="blog-wide-visual"
-                        style={post.imageUrl ? { backgroundImage: `url(${post.imageUrl})` } : undefined}
-                      >
-                        <div className="blog-visual-overlay" />
-                      </div>
-                      <div className="blog-wide-copy">
-                        <div className="blog-card-meta">
-                          <span className="card-tag">Deep Dive</span>
-                          <span>{post.date}</span>
-                        </div>
-                        <h2>{post.title}</h2>
-                        <p>{post.summary}</p>
-                        <div className="blog-wide-footer">
-                          <span className="blog-card-context">Project case study • {post.readTime}</span>
-                          <span className="text-action">Read Article →</span>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </section>
-
-                {projectBlogs.length > 6 && (
-                  <section className="blog-pagination">
-                    <button
-                      type="button"
-                      className="blog-page-button secondary-action"
-                      onClick={() => {
-                        navigate('blog')
-                        setActiveBlogFilter('project')
-                      }}
-                    >
-                      View All Project Articles →
-                    </button>
-                  </section>
-                )}
-              </>
-            )}
-
-{projects.length > 0 && (
-              <section className="projects-grid">
-                {projects[0] && (
-                  <button
-                    type="button"
-                    className="project-feature project-feature-left blog-card-clickable"
-                    onClick={() => openProject(projects[0].id)}
-                  >
-                    <div className="project-feature-copy">
-                      <div>
-                        <span className="card-tag">{projects[0].category}</span>
-                        <h2>{projects[0].title}</h2>
-                        <p>{projects[0].summary}</p>
-                      </div>
-                      <div className="project-feature-footer">
-                        <strong>{projects[0].impact}</strong>
-                        <div className="pill-row">
-                          {projects[0].technologies.map((technology) => (
-                            <span key={`${projects[0].title}-${technology}`} className="pill">
-                              {technology}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="project-feature-visual project-visual-emerald"
-                      style={projects[0].showImage && projects[0].imageUrl ? { backgroundImage: `url(${projects[0].imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
-                    />
-                  </button>
-                )}
-
-                {projects[1] && (
-                  <button
-                    type="button"
-                    className="project-side-card blog-card-clickable"
-                    onClick={() => openProject(projects[1].id)}
-                  >
-                    <div>
-                      <span className="card-tag">{projects[1].category}</span>
-                      <h2>{projects[1].title}</h2>
-                      <p>{projects[1].summary}</p>
-                    </div>
-                    <div className="project-side-footer">
-                      <strong>{projects[1].impact}</strong>
-                      <div className="pill-row">
-                        {projects[1].technologies.map((technology) => (
-                          <span key={`${projects[1].title}-${technology}`} className="pill">
-                            {technology}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </button>
-                )}
-
-                {projects[2] && (
-                  <button
-                    type="button"
-                    className="project-side-card project-side-card-alt blog-card-clickable"
-                    onClick={() => openProject(projects[2].id)}
-                  >
-                    <div>
-                      <span className="card-tag">{projects[2].category}</span>
-                      <h2>{projects[2].title}</h2>
-                      <p>{projects[2].summary}</p>
-                    </div>
-                    <div className="project-side-footer">
-                      <strong>{projects[2].impact}</strong>
-                      <div className="pill-row">
-                        {projects[2].technologies.map((technology) => (
-                          <span key={`${projects[2].title}-${technology}`} className="pill">
-                            {technology}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </button>
-                )}
-
-                {projects[3] && (
-                  <button
-                    type="button"
-                    className="project-feature project-feature-right blog-card-clickable"
-                    onClick={() => openProject(projects[3].id)}
-                  >
-                    <div className="project-feature-copy">
-                      <div>
-                        <span className="card-tag">{projects[3].category}</span>
-                        <h2>{projects[3].title}</h2>
-                        <p>{projects[3].summary}</p>
-                      </div>
-                      <div className="project-feature-footer">
-                        <strong>{projects[3].impact}</strong>
-                        <div className="pill-row">
-                          {projects[3].technologies.map((technology) => (
-                            <span key={`${projects[3].title}-${technology}`} className="pill">
-                              {technology}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="project-feature-visual project-visual-blue"
-                      style={projects[3].showImage && projects[3].imageUrl ? { backgroundImage: `url(${projects[3].imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
-                    />
-                  </button>
-                )}
-
-                {projects[4] && (
-                  <button
-                    type="button"
-                    className="project-standard-card blog-card-clickable"
-                    onClick={() => openProject(projects[4].id)}
-                  >
-                    <span className="card-tag">{projects[4].category}</span>
-                    <h2>{projects[4].title}</h2>
-                    <p>{projects[4].summary}</p>
-                    <strong>{projects[4].impact}</strong>
-                    <div className="pill-row">
-                      {projects[4].technologies.map((technology) => (
-                        <span key={`${projects[4].title}-${technology}`} className="pill">
-                          {technology}
-                        </span>
-                      ))}
-                    </div>
-                  </button>
-                )}
-
-                {projects[5] && (
-                  <button
-                    type="button"
-                    className="project-standard-card blog-card-clickable"
-                    onClick={() => openProject(projects[5].id)}
-                  >
-                    <span className="card-tag">{projects[5].category}</span>
-                    <h2>{projects[5].title}</h2>
-                    <p>{projects[5].summary}</p>
-                    <strong>{projects[5].impact}</strong>
-                    <div className="pill-row">
-                      {projects[5].technologies.map((technology) => (
-                        <span key={`${projects[5].title}-${technology}`} className="pill">
-                          {technology}
-                        </span>
-                      ))}
-                    </div>
-                  </button>
-                )}
-              </section>
-            )}
-          </>
-
-        )}
-
-        {activeView === 'blog' && (
-          <>
-            <section className="blog-intro">
-              <span className="eyebrow">Thoughts on life, technology and the future</span>
-              <p>
-                These entries are a collection of thoughts, reflections, learnings and insights from my life and career.
-                My intention is to leave a piece of value on the bast internet ocean to whoever might find it useful.
-                I'm not a writer, these entries are written as is.
-                Thanks for being here.
-              </p>
-            </section>
-
-            <section className="blog-filters">
-              <div className="blog-filters-header">
-                <div className="blog-filters-label">
-                  <span className="filter-icon" aria-hidden="true">
-                    ≡
-                  </span>
-                  <span>Filter blogs</span>
-                </div>
-                <span className="blog-filters-count">{filteredBlogPosts.length} entries found</span>
-              </div>
-              <div className="blog-filter-pills">
-                {blogFilterOptions.map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    className={`blog-filter-pill ${activeBlogFilter === filter ? 'is-active' : ''}`}
-                    onClick={() => setActiveBlogFilter(filter)}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {featuredBlog ? (
-              <>
-                <section className="blog-grid">
-                  <button type="button" className="blog-feature-card blog-card-clickable" onClick={() => openBlog(featuredBlog.id)}>
-                    <div
-                      className="blog-feature-visual"
-                      style={featuredBlog.imageUrl ? { backgroundImage: `url(${featuredBlog.imageUrl})` } : undefined}
-                    >
-                      <div className="blog-visual-overlay" />
-                    </div>
-                    <div className="blog-feature-copy">
-                      <div className="blog-card-meta">
-                        <span className="card-tag">Featured System</span>
-                        <span>{featuredBlog.date}</span>
-                      </div>
-                      <h2>{featuredBlog.title}</h2>
-                      <p>{featuredBlog.summary}</p>
-                      <div className="blog-feature-footer">
-                        <div className="blog-context-cluster">
-                          <span className="blog-context-icon" aria-hidden="true">
-                            ≈
-                          </span>
-                          <span className="blog-card-context">{featuredBlog.category}</span>
-                        </div>
-                        <span className="text-action">Read Blog →</span>
-                      </div>
-                    </div>
-                  </button>
-
-                  {sideBlog && (
-                    <button type="button" className="blog-side-card blog-card-clickable" onClick={() => openBlog(sideBlog.id)}>
-                      <div>
-                        <div className="blog-card-meta">
-                          <span className="card-tag card-tag-primary">{sideBlog.category}</span>
-                          <span>{sideBlog.date}</span>
-                        </div>
-                        <h3>{sideBlog.title}</h3>
-                        <p>{sideBlog.summary}</p>
-                      </div>
-                      <div className="blog-side-footer">
-                        <div className="blog-side-tags">
-                          {sideBlog.tags.map((tag) => (
-                            <span key={`${sideBlog.id}-${tag}`} className="blog-side-pill">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <span className="text-action">Read Blog →</span>
-                      </div>
-                    </button>
-                  )}
-
-                  {compactBlogs.map((post) => (
-                    <button
-                      key={post.id}
-                      type="button"
-                      className="blog-compact-card blog-card-clickable"
-                      onClick={() => openBlog(post.id)}
-                    >
-                      <div className="blog-compact-body">
-                        <span className="card-tag">{post.category}</span>
-                        <h3>{post.title}</h3>
-                        <p>{post.summary}</p>
-                      </div>
-                      <div className="blog-compact-meta">
-                        <span>{post.date}</span>
-                        <span>{post.tags[0] ?? post.category}</span>
-                      </div>
-                    </button>
-                  ))}
-
-                  {wideBlog && (
-                    <button type="button" className="blog-wide-card blog-card-clickable" onClick={() => openBlog(wideBlog.id)}>
-                      <div
-                        className="blog-wide-visual"
-                        style={wideBlog.imageUrl ? { backgroundImage: `url(${wideBlog.imageUrl})` } : undefined}
-                      >
-                        <div className="blog-visual-overlay" />
-                      </div>
-                      <div className="blog-wide-copy">
-                        <div className="blog-card-meta">
-                          <span className="card-tag">Deep Dive</span>
-                          <span>{wideBlog.date}</span>
-                        </div>
-                        <h2>{wideBlog.title}</h2>
-                        <p>{wideBlog.summary}</p>
-                        <div className="blog-wide-footer">
-                          <span className="blog-card-context">Technical paper • {wideBlog.readTime}</span>
-                          <span className="text-action">Read Blog →</span>
-                        </div>
-                      </div>
-                    </button>
-                  )}
-
-                  {!sideBlog && filteredBlogPosts.length === 1 && (
-                    <div className="blog-single-note">
-                      <p className="meta-label">Latest entry</p>
-                      <p>
-                        Add more blog folders under `blogs/` and this overview will expand into the full
-                        editorial grid from the reference.
-                      </p>
-                    </div>
-                  )}
-                </section>
-
-                {hasMultipleBlogPages && (
-                  <section className="blog-pagination">
-                    <button type="button" className="blog-page-button">
-                      ‹
-                    </button>
-                    <button type="button" className="blog-page-button is-active">
-                      1
-                    </button>
-                    <button type="button" className="blog-page-button">
-                      2
-                    </button>
-                    <button type="button" className="blog-page-button">
-                      3
-                    </button>
-                    <button type="button" className="blog-page-button">
-                      ›
-                    </button>
-                  </section>
-                )}
-              </>
-            ) : (
-              <section className="empty-blog-state">
-                <p>No blog entries found in `blogs/` yet.</p>
-              </section>
-            )}
-          </>
-        )}
-
-        {activeView === 'blogArticle' && selectedPost && (
-          <article className="article-shell">
-            <button type="button" className="back-link" onClick={closeBlog}>
-              Back to Blog
-            </button>
-
-            <nav className="article-breadcrumbs" aria-label="Breadcrumb">
-              <button type="button" className="article-breadcrumb-link" onClick={closeBlog}>
-                Blog
               </button>
-              <span className="article-breadcrumb-separator">›</span>
-              <span>{selectedPost.category}</span>
-            </nav>
+            ))}
 
-            <header className="article-header">
-              <h1>{selectedPost.title}</h1>
-              <div className="article-meta-bar">
-                <div className="article-author">
-                  <div className="article-author-avatar">
-                    <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
+            {projectBlogs.slice(1, 2).map((post) => (
+              <button
+                key={post.id}
+                type="button"
+                className="blog-side-card blog-card-clickable"
+                onClick={() => navigate(`/blog/${encodeURIComponent(post.id)}`)}
+              >
+                <div>
+                  <div className="blog-card-meta">
+                    <span className="card-tag card-tag-primary">{post.category}</span>
+                    <span>{post.date}</span>
                   </div>
-                  <div>
-                    <p>Carlos Santiago Yanzon</p>
-                    <span>Software Engineer</span>
-                  </div>
+                  <h3>{post.title}</h3>
+                  <p>{post.summary}</p>
                 </div>
-                <div className="article-meta-divider" aria-hidden="true" />
-                <div className="article-meta">
-                  <span>{selectedPost.date}</span>
-                  <span>{selectedPost.readTime}</span>
-                </div>
-                {selectedPost.tags.length > 0 && (
-                  <div className="article-tag-row">
-                    {selectedPost.tags.map((tag) => (
-                      <span key={`${selectedPost.id}-${tag}`} className="article-tag">
+                <div className="blog-side-footer">
+                  <div className="blog-side-tags">
+                    {post.tags.slice(0, 3).map((tag) => (
+                      <span key={`${post.id}-${tag}`} className="blog-side-pill">
                         {tag}
                       </span>
                     ))}
                   </div>
-                )}
-              </div>
-            </header>
-
-            {selectedPost.showImage && selectedPost.imageUrl && (
-              <section className="article-image-wrap">
-                <div className="article-image-frame">
-                  <img src={selectedPost.imageUrl} alt={selectedPost.title} className="article-image" />
+                  <span className="text-action">Read Article →</span>
                 </div>
-                <div className="article-image-note">
-                  <p className="meta-label">Key Concept</p>
-                  <p>{selectedPost.summary}</p>
-                </div>
-              </section>
-            )}
-
-            {selectedPost.content.trim() ? (
-              <div
-                className="article-content markdown-content"
-                dangerouslySetInnerHTML={{ __html: renderArticleMarkdown(selectedPost.content) as string }}
-              />
-            ) : (
-              <div className="article-content article-empty-state">
-                <p>No article content found in this post&apos;s `blog.md` yet.</p>
-              </div>
-            )}
-
-            <section className="article-author-panel">
-              <div className="article-author-panel-avatar">
-                <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
-              </div>
-              <div className="article-author-panel-copy">
-                <h4>Carlos Santiago Yanzon</h4>
-                <p>
-                  Software Engineer focused on distributed systems, blockchain infrastructure, and AI
-                  automation for real operational workflows.
-                </p>
-                <div className="contact-links-row">
-                  {contactLinks.map((link) => (
-                    <a
-                      key={`article-${link.label}`}
-                      className="contact-link-button"
-                      href={link.href}
-                      target={link.href.startsWith('http') ? '_blank' : undefined}
-                      rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
-                      aria-label={link.label}
-                      title={link.label}
-                    >
-                      <ContactIcon id={link.id} />
-                      <span className="sr-only">{link.label}</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section className="article-cta">
-              <div className="article-cta-inner">
-                <h3>Need help with a complex system that has to scale reliably?</h3>
-                <p>
-                  Available for consulting on backend architecture, distributed systems design, and
-                  production engineering.
-                </p>
-                <div className="article-cta-actions">
-                  <a className="primary-action article-cta-link" href="mailto:carlosyanzon@protonmail.com">
-                    Send Email
-                  </a>
-                  <a
-                    className="secondary-action article-cta-link"
-                    href="https://www.linkedin.com/in/carlos-santiago-yanzon/"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Chat on LinkedIn
-                  </a>
-                </div>
-              </div>
-            </section>
-          </article>
-        )}
-
-        {activeView === 'projectArticle' && selectedProject && (
-          <article className="article-shell">
-            <button type="button" className="back-link" onClick={closeProject}>
-              Back to Projects
-            </button>
-
-            <nav className="article-breadcrumbs" aria-label="Breadcrumb">
-              <button type="button" className="article-breadcrumb-link" onClick={closeProject}>
-                Projects
               </button>
-              <span className="article-breadcrumb-separator">›</span>
-              <span>{selectedProject.category}</span>
-            </nav>
+            ))}
 
-            <header className="article-header">
-              <h1>{selectedProject.title}</h1>
-              <div className="article-meta-bar">
-                <div className="article-author">
-                  <div className="article-author-avatar">
-                    <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
+            {projectBlogs.slice(2, 5).map((post) => (
+              <button
+                key={post.id}
+                type="button"
+                className="blog-compact-card blog-card-clickable"
+                onClick={() => navigate(`/blog/${encodeURIComponent(post.id)}`)}
+              >
+                <div className="blog-compact-body">
+                  <span className="card-tag">{post.category}</span>
+                  <h3>{post.title}</h3>
+                  <p>{post.summary}</p>
+                </div>
+                <div className="blog-compact-meta">
+                  <span>{post.date}</span>
+                  <span>{post.tags[0] ?? post.category}</span>
+                </div>
+              </button>
+            ))}
+
+            {projectBlogs.length > 5 && projectBlogs.slice(5, 6).map((post) => (
+              <button
+                key={post.id}
+                type="button"
+                className="blog-wide-card blog-card-clickable"
+                onClick={() => navigate(`/blog/${encodeURIComponent(post.id)}`)}
+              >
+                <div
+                  className="blog-wide-visual"
+                  style={post.imageUrl ? { backgroundImage: `url(${post.imageUrl})` } : undefined}
+                >
+                  <div className="blog-visual-overlay" />
+                </div>
+                <div className="blog-wide-copy">
+                  <div className="blog-card-meta">
+                    <span className="card-tag">Deep Dive</span>
+                    <span>{post.date}</span>
                   </div>
-                  <div>
-                    <p>Carlos Santiago Yanzon</p>
-                    <span>Software Engineer</span>
+                  <h2>{post.title}</h2>
+                  <p>{post.summary}</p>
+                  <div className="blog-wide-footer">
+                    <span className="blog-card-context">Project case study • {post.readTime}</span>
+                    <span className="text-action">Read Article →</span>
                   </div>
                 </div>
-                <div className="article-meta-divider" aria-hidden="true" />
-                <div className="article-meta">
-                  <span>{selectedProject.category}</span>
-                </div>
-                <div className="article-tag-row">
-                  {selectedProject.technologies.map((tech) => (
-                    <span key={`${selectedProject.id}-${tech}`} className="article-tag">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </header>
+              </button>
+            ))}
+          </section>
 
-            {selectedProject.showImage && selectedProject.imageUrl && (
-              <section className="article-image-wrap">
-                <div className="article-image-frame">
-                  <img src={selectedProject.imageUrl} alt={selectedProject.title} className="article-image" />
-                </div>
-                <div className="article-image-note">
-                  <p className="meta-label">Project Impact</p>
-                  <p>{selectedProject.impact}</p>
-                </div>
-              </section>
-            )}
+          {projectBlogs.length > 6 && (
+            <section className="blog-pagination">
+              <button
+                type="button"
+                className="blog-page-button secondary-action"
+                onClick={() => navigate('/blog')}
+              >
+                View All Project Articles →
+              </button>
+            </section>
+          )}
+        </>
+      )}
 
-            {selectedProject.content && selectedProject.content.trim() ? (
-              <div
-                className="article-content markdown-content"
-                dangerouslySetInnerHTML={{ __html: renderArticleMarkdown(selectedProject.content) as string }}
-              />
-            ) : (
-              <div className="article-content article-empty-state">
-                <p>No detailed documentation found for this project yet.</p>
-                <div className="project-summary-fallback">
-                  <h3>Summary</h3>
-                  <p>{selectedProject.summary}</p>
-                  <h3>Impact</h3>
-                  <p>{selectedProject.impact}</p>
-                  <h3>Technologies</h3>
+      {projects.length > 0 && (
+        <section className="projects-grid">
+          {projects[0] && (
+            <button
+              type="button"
+              className="project-feature project-feature-left blog-card-clickable"
+              onClick={() => navigate(`/projects/${encodeURIComponent(projects[0].id)}`)}
+            >
+              <div className="project-feature-copy">
+                <div>
+                  <span className="card-tag">{projects[0].category}</span>
+                  <h2>{projects[0].title}</h2>
+                  <p>{projects[0].summary}</p>
+                </div>
+                <div className="project-feature-footer">
+                  <strong>{projects[0].impact}</strong>
                   <div className="pill-row">
-                    {selectedProject.technologies.map((tech) => (
-                      <span key={`fallback-${tech}`} className="pill">
-                        {tech}
+                    {projects[0].technologies.map((technology) => (
+                      <span key={`${projects[0].title}-${technology}`} className="pill">
+                        {technology}
                       </span>
                     ))}
                   </div>
                 </div>
               </div>
-            )}
+              <div
+                className="project-feature-visual project-visual-emerald"
+                style={projects[0].showImage && projects[0].imageUrl ? { backgroundImage: `url(${projects[0].imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+              />
+            </button>
+          )}
 
-            <section className="article-author-panel">
-              <div className="article-author-panel-avatar">
-                <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
+          {projects[1] && (
+            <button
+              type="button"
+              className="project-side-card blog-card-clickable"
+              onClick={() => navigate(`/projects/${encodeURIComponent(projects[1].id)}`)}
+            >
+              <div>
+                <span className="card-tag">{projects[1].category}</span>
+                <h2>{projects[1].title}</h2>
+                <p>{projects[1].summary}</p>
               </div>
-              <div className="article-author-panel-copy">
-                <h4>Carlos Santiago Yanzon</h4>
-                <p>
-                  Software Engineer focused on distributed systems, blockchain infrastructure, and AI
-                  automation for real operational workflows.
-                </p>
-                <div className="contact-links-row">
-                  {contactLinks.map((link) => (
-                    <a
-                      key={`project-article-${link.label}`}
-                      className="contact-link-button"
-                      href={link.href}
-                      target={link.href.startsWith('http') ? '_blank' : undefined}
-                      rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
-                      aria-label={link.label}
-                      title={link.label}
-                    >
-                      <ContactIcon id={link.id} />
-                      <span className="sr-only">{link.label}</span>
-                    </a>
+              <div className="project-side-footer">
+                <strong>{projects[1].impact}</strong>
+                <div className="pill-row">
+                  {projects[1].technologies.map((technology) => (
+                    <span key={`${projects[1].title}-${technology}`} className="pill">
+                      {technology}
+                    </span>
                   ))}
                 </div>
               </div>
-            </section>
+            </button>
+          )}
 
-            <section className="article-cta">
-              <div className="article-cta-inner">
-                <h3>Need help with a complex system that has to scale reliably?</h3>
-                <p>
-                  Available for consulting on backend architecture, distributed systems design, and
-                  production engineering.
-                </p>
-                <div className="article-cta-actions">
-                  <a className="primary-action article-cta-link" href="mailto:carlosyanzon@protonmail.com">
-                    Send Email
-                  </a>
-                  <a
-                    className="secondary-action article-cta-link"
-                    href="https://www.linkedin.com/in/carlos-santiago-yanzon/"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Chat on LinkedIn
-                  </a>
+          {projects[2] && (
+            <button
+              type="button"
+              className="project-side-card project-side-card-alt blog-card-clickable"
+              onClick={() => navigate(`/projects/${encodeURIComponent(projects[2].id)}`)}
+            >
+              <div>
+                <span className="card-tag">{projects[2].category}</span>
+                <h2>{projects[2].title}</h2>
+                <p>{projects[2].summary}</p>
+              </div>
+              <div className="project-side-footer">
+                <strong>{projects[2].impact}</strong>
+                <div className="pill-row">
+                  {projects[2].technologies.map((technology) => (
+                    <span key={`${projects[2].title}-${technology}`} className="pill">
+                      {technology}
+                    </span>
+                  ))}
                 </div>
               </div>
+            </button>
+          )}
+
+          {projects[3] && (
+            <button
+              type="button"
+              className="project-feature project-feature-right blog-card-clickable"
+              onClick={() => navigate(`/projects/${encodeURIComponent(projects[3].id)}`)}
+            >
+              <div className="project-feature-copy">
+                <div>
+                  <span className="card-tag">{projects[3].category}</span>
+                  <h2>{projects[3].title}</h2>
+                  <p>{projects[3].summary}</p>
+                </div>
+                <div className="project-feature-footer">
+                  <strong>{projects[3].impact}</strong>
+                  <div className="pill-row">
+                    {projects[3].technologies.map((technology) => (
+                      <span key={`${projects[3].title}-${technology}`} className="pill">
+                        {technology}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div
+                className="project-feature-visual project-visual-blue"
+                style={projects[3].showImage && projects[3].imageUrl ? { backgroundImage: `url(${projects[3].imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+              />
+            </button>
+          )}
+
+          {projects[4] && (
+            <button
+              type="button"
+              className="project-standard-card blog-card-clickable"
+              onClick={() => navigate(`/projects/${encodeURIComponent(projects[4].id)}`)}
+            >
+              <span className="card-tag">{projects[4].category}</span>
+              <h2>{projects[4].title}</h2>
+              <p>{projects[4].summary}</p>
+              <strong>{projects[4].impact}</strong>
+              <div className="pill-row">
+                {projects[4].technologies.map((technology) => (
+                  <span key={`${projects[4].title}-${technology}`} className="pill">
+                    {technology}
+                  </span>
+                ))}
+              </div>
+            </button>
+          )}
+
+          {projects[5] && (
+            <button
+              type="button"
+              className="project-standard-card blog-card-clickable"
+              onClick={() => navigate(`/projects/${encodeURIComponent(projects[5].id)}`)}
+            >
+              <span className="card-tag">{projects[5].category}</span>
+              <h2>{projects[5].title}</h2>
+              <p>{projects[5].summary}</p>
+              <strong>{projects[5].impact}</strong>
+              <div className="pill-row">
+                {projects[5].technologies.map((technology) => (
+                  <span key={`${projects[5].title}-${technology}`} className="pill">
+                    {technology}
+                  </span>
+                ))}
+              </div>
+            </button>
+          )}
+        </section>
+      )}
+    </>
+  )
+}
+
+function BlogView() {
+  const navigate = useNavigate()
+  const [activeBlogFilter, setActiveBlogFilter] = useState<string>('All Blogs')
+
+  // Derive filter options from blog tags
+  const allTags = new Set<string>()
+  blogSummaries.forEach((post) => {
+    post.tags.forEach((tag) => allTags.add(tag))
+  })
+  const blogFilterOptions = ['All Blogs', ...Array.from(allTags).sort()]
+
+  // Filter blogs based on active filter
+  const filteredBlogPosts = activeBlogFilter === 'All Blogs'
+    ? blogSummaries
+    : blogSummaries.filter((post) => post.tags.includes(activeBlogFilter))
+
+  // Layout assignments
+  const featuredBlog = filteredBlogPosts[0]
+  const sideBlog = filteredBlogPosts[1]
+  const compactBlogs = filteredBlogPosts.slice(2, 5)
+  const wideBlog = filteredBlogPosts[5]
+  const hasMultipleBlogPages = filteredBlogPosts.length > 6
+
+  return (
+    <>
+      <section className="blog-intro">
+        <span className="eyebrow">Thoughts on life, technology and the future</span>
+        <p>
+          These entries are a collection of thoughts, reflections, learnings and insights from my life and career.
+          My intention is to leave a piece of value on the bast internet ocean to whoever might find it useful.
+          I'm not a writer, these entries are written as is.
+          Thanks for being here.
+        </p>
+      </section>
+
+      <section className="blog-filters">
+        <div className="blog-filters-header">
+          <div className="blog-filters-label">
+            <span className="filter-icon" aria-hidden="true">
+              ≡
+            </span>
+            <span>Filter blogs</span>
+          </div>
+          <span className="blog-filters-count">{filteredBlogPosts.length} entries found</span>
+        </div>
+        <div className="blog-filter-pills">
+          {blogFilterOptions.map((filter) => (
+            <button
+              key={filter}
+              type="button"
+              className={`blog-filter-pill ${activeBlogFilter === filter ? 'is-active' : ''}`}
+              onClick={() => setActiveBlogFilter(filter)}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {featuredBlog ? (
+        <>
+          <section className="blog-grid">
+            <button type="button" className="blog-feature-card blog-card-clickable" onClick={() => navigate(`/blog/${encodeURIComponent(featuredBlog.id)}`)}>
+              <div
+                className="blog-feature-visual"
+                style={featuredBlog.imageUrl ? { backgroundImage: `url(${featuredBlog.imageUrl})` } : undefined}
+              >
+                <div className="blog-visual-overlay" />
+              </div>
+              <div className="blog-feature-copy">
+                <div className="blog-card-meta">
+                  <span className="card-tag">Featured System</span>
+                  <span>{featuredBlog.date}</span>
+                </div>
+                <h2>{featuredBlog.title}</h2>
+                <p>{featuredBlog.summary}</p>
+                <div className="blog-feature-footer">
+                  <div className="blog-context-cluster">
+                    <span className="blog-context-icon" aria-hidden="true">
+                      ≈
+                    </span>
+                    <span className="blog-card-context">{featuredBlog.category}</span>
+                  </div>
+                  <span className="text-action">Read Blog →</span>
+                </div>
+              </div>
+            </button>
+
+            {sideBlog && (
+              <button type="button" className="blog-side-card blog-card-clickable" onClick={() => navigate(`/blog/${encodeURIComponent(sideBlog.id)}`)}>
+                <div>
+                  <div className="blog-card-meta">
+                    <span className="card-tag card-tag-primary">{sideBlog.category}</span>
+                    <span>{sideBlog.date}</span>
+                  </div>
+                  <h3>{sideBlog.title}</h3>
+                  <p>{sideBlog.summary}</p>
+                </div>
+                <div className="blog-side-footer">
+                  <div className="blog-side-tags">
+                    {sideBlog.tags.map((tag) => (
+                      <span key={`${sideBlog.id}-${tag}`} className="blog-side-pill">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <span className="text-action">Read Blog →</span>
+                </div>
+              </button>
+            )}
+
+            {compactBlogs.map((post) => (
+              <button
+                key={post.id}
+                type="button"
+                className="blog-compact-card blog-card-clickable"
+                onClick={() => navigate(`/blog/${encodeURIComponent(post.id)}`)}
+              >
+                <div className="blog-compact-body">
+                  <span className="card-tag">{post.category}</span>
+                  <h3>{post.title}</h3>
+                  <p>{post.summary}</p>
+                </div>
+                <div className="blog-compact-meta">
+                  <span>{post.date}</span>
+                  <span>{post.tags[0] ?? post.category}</span>
+                </div>
+              </button>
+            ))}
+
+            {wideBlog && (
+              <button type="button" className="blog-wide-card blog-card-clickable" onClick={() => navigate(`/blog/${encodeURIComponent(wideBlog.id)}`)}>
+                <div
+                  className="blog-wide-visual"
+                  style={wideBlog.imageUrl ? { backgroundImage: `url(${wideBlog.imageUrl})` } : undefined}
+                >
+                  <div className="blog-visual-overlay" />
+                </div>
+                <div className="blog-wide-copy">
+                  <div className="blog-card-meta">
+                    <span className="card-tag">Deep Dive</span>
+                    <span>{wideBlog.date}</span>
+                  </div>
+                  <h2>{wideBlog.title}</h2>
+                  <p>{wideBlog.summary}</p>
+                  <div className="blog-wide-footer">
+                    <span className="blog-card-context">Technical paper • {wideBlog.readTime}</span>
+                    <span className="text-action">Read Blog →</span>
+                  </div>
+                </div>
+              </button>
+            )}
+
+            {!sideBlog && filteredBlogPosts.length === 1 && (
+              <div className="blog-single-note">
+                <p className="meta-label">Latest entry</p>
+                <p>
+                  Add more blog folders under `blogs/` and this overview will expand into the full
+                  editorial grid from the reference.
+                </p>
+              </div>
+            )}
+          </section>
+
+          {hasMultipleBlogPages && (
+            <section className="blog-pagination">
+              <button type="button" className="blog-page-button">
+                ‹
+              </button>
+              <button type="button" className="blog-page-button is-active">
+                1
+              </button>
+              <button type="button" className="blog-page-button">
+                2
+              </button>
+              <button type="button" className="blog-page-button">
+                3
+              </button>
+              <button type="button" className="blog-page-button">
+                ›
+              </button>
             </section>
-          </article>
-        )}
+          )}
+        </>
+      ) : (
+        <section className="empty-blog-state">
+          <p>No blog entries found in `blogs/` yet.</p>
+        </section>
+      )}
+    </>
+  )
+}
+
+function BlogArticleView() {
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const [selectedPost, setSelectedPost] = useState<typeof blogSummaries[0] & { content: string } | null>(null)
+
+  useEffect(() => {
+    if (id) {
+      const decodedId = decodeURIComponent(id)
+      const post = loadBlogPostById(decodedId)
+      if (post) {
+        setSelectedPost(post)
+      }
+    }
+  }, [id])
+
+  // Initialize and render mermaid diagrams after content is loaded
+  useEffect(() => {
+    if (selectedPost?.content) {
+      mermaid.initialize({ startOnLoad: false, theme: 'dark' })
+      mermaid.run({
+        querySelector: '.mermaid',
+      }).catch((error) => console.error('Mermaid rendering error:', error))
+    }
+  }, [selectedPost])
+
+  if (!selectedPost) {
+    return <div>Loading...</div>
+  }
+
+  return (
+    <article className="article-shell">
+      <button type="button" className="back-link" onClick={() => navigate('/blog')}>
+        Back to Blog
+      </button>
+
+      <nav className="article-breadcrumbs" aria-label="Breadcrumb">
+        <button type="button" className="article-breadcrumb-link" onClick={() => navigate('/blog')}>
+          Blog
+        </button>
+        <span className="article-breadcrumb-separator">›</span>
+        <span>{selectedPost.category}</span>
+      </nav>
+
+      <header className="article-header">
+        <h1>{selectedPost.title}</h1>
+        <div className="article-meta-bar">
+          <div className="article-author">
+            <div className="article-author-avatar">
+              <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
+            </div>
+            <div>
+              <p>Carlos Santiago Yanzon</p>
+              <span>Software Engineer</span>
+            </div>
+          </div>
+          <div className="article-meta-divider" aria-hidden="true" />
+          <div className="article-meta">
+            <span>{selectedPost.date}</span>
+            <span>{selectedPost.readTime}</span>
+          </div>
+          <ShareButton title={selectedPost.title} url={window.location.href} />
+          {selectedPost.tags.length > 0 && (
+            <div className="article-tag-row">
+              {selectedPost.tags.map((tag) => (
+                <span key={`${selectedPost.id}-${tag}`} className="article-tag">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </header>
+
+      {selectedPost.showImage && selectedPost.imageUrl && (
+        <section className="article-image-wrap">
+          <div className="article-image-frame">
+            <img src={selectedPost.imageUrl} alt={selectedPost.title} className="article-image" />
+          </div>
+          <div className="article-image-note">
+            <p className="meta-label">Key Concept</p>
+            <p>{selectedPost.summary}</p>
+          </div>
+        </section>
+      )}
+
+      {selectedPost.content.trim() ? (
+        <div
+          className="article-content markdown-content"
+          dangerouslySetInnerHTML={{ __html: renderArticleMarkdown(selectedPost.content) as string }}
+        />
+      ) : (
+        <div className="article-content article-empty-state">
+          <p>No article content found in this post&apos;s `blog.md` yet.</p>
+        </div>
+      )}
+
+      <section className="article-author-panel">
+        <div className="article-author-panel-avatar">
+          <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
+        </div>
+        <div className="article-author-panel-copy">
+          <h4>Carlos Santiago Yanzon</h4>
+          <p>
+            Software Engineer focused on distributed systems, blockchain infrastructure, and AI
+            automation for real operational workflows.
+          </p>
+          <div className="contact-links-row">
+            {contactLinks.map((link) => (
+              <a
+                key={`article-${link.label}`}
+                className="contact-link-button"
+                href={link.href}
+                target={link.href.startsWith('http') ? '_blank' : undefined}
+                rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
+                aria-label={link.label}
+                title={link.label}
+              >
+                <ContactIcon id={link.id} />
+                <span className="sr-only">{link.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="article-cta">
+        <div className="article-cta-inner">
+          <h3>Need help with a complex system that has to scale reliably?</h3>
+          <p>
+            Available for consulting on backend architecture, distributed systems design, and
+            production engineering.
+          </p>
+          <div className="article-cta-actions">
+            <a className="primary-action article-cta-link" href="mailto:carlosyanzon@protonmail.com">
+              Send Email
+            </a>
+            <a
+              className="secondary-action article-cta-link"
+              href="https://www.linkedin.com/in/carlos-santiago-yanzon/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Chat on LinkedIn
+            </a>
+          </div>
+        </div>
+      </section>
+    </article>
+  )
+}
+
+function ProjectArticleView() {
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const [selectedProject, setSelectedProject] = useState<ProjectArticle | null>(null)
+
+  useEffect(() => {
+    if (id) {
+      const decodedId = decodeURIComponent(id)
+      loadProjectById(decodedId).then((project) => {
+        if (project) {
+          setSelectedProject(project)
+        }
+      })
+    }
+  }, [id])
+
+  // Initialize and render mermaid diagrams after content is loaded
+  useEffect(() => {
+    if (selectedProject?.content) {
+      mermaid.initialize({ startOnLoad: false, theme: 'dark' })
+      mermaid.run({
+        querySelector: '.mermaid',
+      }).catch((error) => console.error('Mermaid rendering error:', error))
+    }
+  }, [selectedProject])
+
+  if (!selectedProject) {
+    return <div>Loading...</div>
+  }
+
+  return (
+    <article className="article-shell">
+      <button type="button" className="back-link" onClick={() => navigate('/projects')}>
+        Back to Projects
+      </button>
+
+      <nav className="article-breadcrumbs" aria-label="Breadcrumb">
+        <button type="button" className="article-breadcrumb-link" onClick={() => navigate('/projects')}>
+          Projects
+        </button>
+        <span className="article-breadcrumb-separator">›</span>
+        <span>{selectedProject.category}</span>
+      </nav>
+
+      <header className="article-header">
+        <h1>{selectedProject.title}</h1>
+        <div className="article-meta-bar">
+          <div className="article-author">
+            <div className="article-author-avatar">
+              <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
+            </div>
+            <div>
+              <p>Carlos Santiago Yanzon</p>
+              <span>Software Engineer</span>
+            </div>
+          </div>
+          <div className="article-meta-divider" aria-hidden="true" />
+          <div className="article-meta">
+            <span>{selectedProject.category}</span>
+          </div>
+          <ShareButton title={selectedProject.title} url={window.location.href} />
+          <div className="article-tag-row">
+            {selectedProject.technologies.map((tech) => (
+              <span key={`${selectedProject.id}-${tech}`} className="article-tag">
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {selectedProject.showImage && selectedProject.imageUrl && (
+        <section className="article-image-wrap">
+          <div className="article-image-frame">
+            <img src={selectedProject.imageUrl} alt={selectedProject.title} className="article-image" />
+          </div>
+          <div className="article-image-note">
+            <p className="meta-label">Project Impact</p>
+            <p>{selectedProject.impact}</p>
+          </div>
+        </section>
+      )}
+
+      {selectedProject.content && selectedProject.content.trim() ? (
+        <div
+          className="article-content markdown-content"
+          dangerouslySetInnerHTML={{ __html: renderArticleMarkdown(selectedProject.content) as string }}
+        />
+      ) : (
+        <div className="article-content article-empty-state">
+          <p>No detailed documentation found for this project yet.</p>
+          <div className="project-summary-fallback">
+            <h3>Summary</h3>
+            <p>{selectedProject.summary}</p>
+            <h3>Impact</h3>
+            <p>{selectedProject.impact}</p>
+            <h3>Technologies</h3>
+            <div className="pill-row">
+              {selectedProject.technologies.map((tech) => (
+                <span key={`fallback-${tech}`} className="pill">
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <section className="article-author-panel">
+        <div className="article-author-panel-avatar">
+          <img src="/profile.jpg" alt="Carlos Santiago Yanzon" />
+        </div>
+        <div className="article-author-panel-copy">
+          <h4>Carlos Santiago Yanzon</h4>
+          <p>
+            Software Engineer focused on distributed systems, blockchain infrastructure, and AI
+            automation for real operational workflows.
+          </p>
+          <div className="contact-links-row">
+            {contactLinks.map((link) => (
+              <a
+                key={`project-article-${link.label}`}
+                className="contact-link-button"
+                href={link.href}
+                target={link.href.startsWith('http') ? '_blank' : undefined}
+                rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
+                aria-label={link.label}
+                title={link.label}
+              >
+                <ContactIcon id={link.id} />
+                <span className="sr-only">{link.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="article-cta">
+        <div className="article-cta-inner">
+          <h3>Need help with a complex system that has to scale reliably?</h3>
+          <p>
+            Available for consulting on backend architecture, distributed systems design, and
+            production engineering.
+          </p>
+          <div className="article-cta-actions">
+            <a className="primary-action article-cta-link" href="mailto:carlosyanzon@protonmail.com">
+              Send Email
+            </a>
+            <a
+              className="secondary-action article-cta-link"
+              href="https://www.linkedin.com/in/carlos-santiago-yanzon/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Chat on LinkedIn
+            </a>
+          </div>
+        </div>
+      </section>
+    </article>
+  )
+}
+
+function App() {
+  const location = useLocation()
+  const isBlogSectionActive = location.pathname.startsWith('/blog')
+
+  return (
+    <div className="app-shell">
+      <div className="site-bg" />
+      <Header isBlogSectionActive={isBlogSectionActive} />
+
+      <main className="page-shell">
+        <Routes>
+          <Route path="/" element={<HomeView />} />
+          <Route path="/cv" element={<CVView />} />
+          <Route path="/projects" element={<ProjectsView />} />
+          <Route path="/projects/:id" element={<ProjectArticleView />} />
+          <Route path="/blog" element={<BlogView />} />
+          <Route path="/blog/:id" element={<BlogArticleView />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
 
-      <footer className="site-footer">
-        {/* <div>
-          <span className="brand-kicker">Portfolio System</span>
-          <strong>Built around the UI direction from `tmp`.</strong>
-        </div> */}
-        <div className="footer-links">
-          <button type="button" onClick={() => navigate('home')}>
-            Home
-          </button>
-          <button type="button" onClick={() => navigate('cv')}>
-            CV
-          </button>
-          <button type="button" onClick={() => navigate('projects')}>
-            Projects
-          </button>
-          <button type="button" onClick={() => navigate('blog')}>
-            Blog
-          </button>
-        </div>
-      </footer>
+      <Footer />
     </div>
+  )
+}
+
+// Header component
+function Header({ isBlogSectionActive }: { isBlogSectionActive: boolean }) {
+  return (
+    <header className="topbar">
+      <div className="brand-block">
+        <span className="brand-kicker">Bizk Dev</span>
+        <span className="brand-name">Carlos Santiago Yanzon</span>
+      </div>
+
+      <nav className="topnav" aria-label="Primary">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.id}
+            to={item.id === 'home' ? '/' : `/${item.id}`}
+            className={({ isActive }) => {
+              const active = isActive || (item.id === 'blog' && isBlogSectionActive)
+              return `nav-link ${active ? 'is-active' : ''}`
+            }}
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="topbar-actions">
+        <NavLink to="/cv" className="contact-button">
+          Contact / CV
+        </NavLink>
+      </div>
+    </header>
+  )
+}
+
+// Footer component
+function Footer() {
+  const navigate = useNavigate()
+
+  return (
+    <footer className="site-footer">
+      <div className="footer-links">
+        <button type="button" onClick={() => navigate('/')}>
+          Home
+        </button>
+        <button type="button" onClick={() => navigate('/cv')}>
+          CV
+        </button>
+        <button type="button" onClick={() => navigate('/projects')}>
+          Projects
+        </button>
+        <button type="button" onClick={() => navigate('/blog')}>
+          Blog
+        </button>
+      </div>
+    </footer>
   )
 }
 

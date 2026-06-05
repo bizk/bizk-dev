@@ -42,7 +42,44 @@ const markdownModules = import.meta.glob('../../projects/**/project.md', {
   import: 'default',
 }) as Record<string, () => Promise<string>>
 
+const assetModules = import.meta.glob('../../projects/**/assets/*', {
+  eager: true,
+  import: 'default',
+}) as Record<string, string>
+
 const getFolderId = (path: string) => path.split('/').slice(-2, -1)[0]
+
+const processMarkdownImages = (content: string, projectId: string): string => {
+  let processedContent = content
+
+  // Replace markdown image syntax: ![alt](./assets/image.png)
+  processedContent = processedContent.replace(/!\[(.*?)\]\((\.\/assets\/[^)]+)\)/g, (match, alt, relativePath) => {
+    const assetPath = Object.keys(assetModules).find((path) =>
+      path.includes(`/${projectId}/`) && path.endsWith(relativePath.replace('./', ''))
+    )
+
+    if (assetPath && assetModules[assetPath]) {
+      return `![${alt}](${assetModules[assetPath]})`
+    }
+
+    return match
+  })
+
+  // Replace HTML img tags: <img src="./assets/image.png" ...>
+  processedContent = processedContent.replace(/(<img[^>]*src=["'])(\.\/assets\/[^"']+)(["'][^>]*>)/g, (match, before, relativePath, after) => {
+    const assetPath = Object.keys(assetModules).find((path) =>
+      path.includes(`/${projectId}/`) && path.endsWith(relativePath.replace('./', ''))
+    )
+
+    if (assetPath && assetModules[assetPath]) {
+      return `${before}${assetModules[assetPath]}${after}`
+    }
+
+    return match
+  })
+
+  return processedContent
+}
 
 const sortProjects = (projects: Project[]): Project[] =>
   projects.sort((a, b) => {
@@ -88,7 +125,12 @@ export const loadProjectById = async (id: string): Promise<ProjectArticle | null
 
   // Try to load markdown content
   const markdownPath = Object.keys(markdownModules).find((path) => getFolderId(path) === id)
-  const content = markdownPath ? await markdownModules[markdownPath]() : undefined
+  let content = markdownPath ? await markdownModules[markdownPath]() : undefined
+
+  // Process markdown to replace relative image paths with imported asset URLs
+  if (content) {
+    content = processMarkdownImages(content, id)
+  }
 
   return {
     ...project,

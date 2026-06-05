@@ -15,9 +15,11 @@
     "@cloudflare/vite-plugin": "^1.14.2",
     "highlight.js": "^11.11.1",
     "marked": "^17.0.5",
+    "mermaid": "^11.15.0",
     "primereact": "^10.9.7",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.17.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
